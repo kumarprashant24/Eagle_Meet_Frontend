@@ -6,6 +6,10 @@
   height: 40vmin;
   pointer-events: none;
 }
+video{
+ 
+  width: 100%;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
