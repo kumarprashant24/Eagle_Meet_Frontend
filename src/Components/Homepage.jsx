@@ -29,20 +29,20 @@ export default function Homepage() {
                   Meet
                 </div>
               </div>
-              <div className="d-flex">
-                <div className="p-4 ps-0">
+              <div className="row ">
+                <div className=" col p-4 ">
                   <h2 className="">2.7K</h2>
                   <p className="">Users</p>
                 </div>
-                <div className="p-4">
+                <div className=" col p-4">
                   <h2 className="">1.8K</h2>
                   <p className="">Subscribes</p>
                 </div>
-                <div className="p-4">
+                <div className="col p-4">
                   <h2 className="">35</h2>
                   <p className="">Downloads</p>
                 </div>
-                <div className="p-4">
+                <div className="col p-4">
                   <h2 className="">4</h2>
                   <p className="">Products</p>
                 </div>

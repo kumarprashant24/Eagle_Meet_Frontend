@@ -4,28 +4,40 @@ import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import Peer from "peerjs";
 import io from "socket.io-client";
+import { useRef } from "react";
 const socketURL = "http://localhost:5000";
 const socket = io.connect(socketURL);
 
 let checkpeer = {};
 
 export default function Meeting() {
+  const videoGridPanel = useRef();
   const { uid } = useParams();
   const [peerid, setPeerId] = useState("");
   const myVideo = document.createElement("video");
+  const col = document.createElement("div");
+  col.setAttribute("class", "col");
+  col.append(myVideo);
+  let [clients, setClients] = useState([]);
+  let myStreamId = "" 
+  const [myStreamVideo, setMyStreamVideo] = useState(null);
 
-  const videoGrid = document.getElementById("video-grid");
-
+  const [isMuted, setIsMuted] = useState(false);
+  const [isDisplay, setIsDisplay] = useState(false);
   const peer = new Peer();
 
   const loadUser = () => {
-    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-      addVideoStream(myVideo, stream);
+    setClients([]);
+
+    navigator.mediaDevices.getUserMedia({ video: true,audio:false}).then((stream) => {
+    
+      myStreamId = stream.id;
+      setMyStreamVideo(stream);
+      addVideoStream(col, stream);
       peer.on("call", (call) => {
-        call.answer(stream);
-        const video = document.createElement("video");
+        call.answer(stream)
         call.on("stream", (userVideoStream) => {
-          addVideoStream(video, userVideoStream);
+          addVideoStream(col, userVideoStream);
         });
       });
       socket.off().on("user-connected", (data) => {
@@ -34,48 +46,110 @@ export default function Meeting() {
     });
     peer.on("open", (id) => {
       setPeerId(id);
-      socket.emit("join_room", { room: uid, id: id });
+      socket.emit("join_room", { room: uid, id: id,streamId:myStreamId});
     });
   };
-  
+
   useEffect(() => {
     loadUser();
+    console.log(clients);
   }, []);
 
   function connectToNewUser(data, stream) {
-    const videoUser = document.createElement("video");
+    
     const call = peer.call(data, stream);
     call.on("stream", (userVideoStream) => {
-      addVideoStream(videoUser, userVideoStream);
+      addVideoStream(col, userVideoStream);
     });
     call.on("close", () => {
-      videoUser.remove();
+     
     });
 
     checkpeer[data] = call;
   }
-  function addVideoStream(video, stream) {
-    const videoGrid = document.getElementById("video-grid");
-
-    video.srcObject = stream;
-    video.addEventListener("loadedmetadata", () => {
-      video.play();
-    });
-    videoGrid.append(video);
+  function addVideoStream(col, stream) {
+    
+    setClients((current) => [...current, stream]);
+    console.log(clients);
   }
 
-  socket.on("user-disconnected", (userId) => {
-    if (checkpeer[userId]) checkpeer[userId].close();
+  socket.on("user-disconnected", (data) => {
+    console.log(data);
+    if (checkpeer[data.id]) checkpeer[data.id].close();
+    document.getElementById(data.streamId).remove();
+
   });
 
+  const mute = () => {
+ 
+    // if (isMuted === false) {
+    //   console.log(   myStreamVideo.getTracks());
+    //   myStreamVideo.getTracks()[0].enabled = false;
+    //   setIsMuted(true);
+    // } else {
+    //   myStreamVideo.getTracks()[0].enabled = true;
+    //   setIsMuted(false);
+    // }
+  };
+  const stopVideo = () => {
+    if (isDisplay === false) {
+      console.log( myStreamVideo.getTracks());
+      myStreamVideo.getTracks()[0].enabled = false;
+
+      setIsDisplay(true);
+    } else {
+      myStreamVideo.getTracks()[0].enabled = true;
+      setIsDisplay(false);
+    }
+  };
   return (
     <>
-      {/* <h1>{peerid}</h1> */}
-      {/* <button onClick={joinRoom}>click</button>
-      <button onClick={send}>send</button>
-      <h1>{message}</h1> */}
-
-      <div id="video-grid" className=""></div>
+      <div
+        style={{ height: "90vh", overflow: "auto" }}
+        className="position-relative"
+      >
+        <div className="row" id="rows">
+     
+          {clients.map((element, index) => {
+            return (
+              <>
+                <div className="col" id={element.id}>
+                  <video
+                 
+                    ref={(video) => {
+                      if (video) video.srcObject = element;
+                    }}
+                    autoPlay
+                  ></video>
+                </div>
+              </>
+            );
+          })}
+        </div>
+        <div className="d-flex justify-content-center">
+          <div
+            onClick={() => {
+              mute();
+            }}
+          >
+            {isMuted ? (
+              <i className="fa-solid  fa-microphone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+            ) : (
+              <i className="fa-solid  fa-microphone unmute bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
+            )}
+          </div>
+          <div onClick={stopVideo}>
+            {isDisplay ? (
+              <i className="fa-solid  fa-video-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+            ) : (
+              <i className="fa-solid  fa-video call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
+            )}
+          </div>
+          <div>
+            <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
