@@ -6,15 +6,36 @@
   height: 40vmin;
   pointer-events: none;
 }
-/* video{
- 
-  width: 100%;
-  height: fit-content;
-} */
+
 video{
   width: 100%; 
-  height: 100%;
+  /* height: 100%; */
 
+}
+.tiny_pic{
+  height: 50px;
+  width: 50px;
+  clip-path: circle(50%);
+}
+.logo{
+  height: 60px;
+  width: 80px;
+  object-fit: contain;
+  
+}
+.grid-system{
+
+  
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(50%,1fr));
+  /* grid-template-rows: repeat(1,minmax(100%,1fr)); */
+}
+.grid-system-even{
+
+  background-color: #61dafb;
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(100%,1fr));
+  /* grid-template-rows: repeat(1,minmax(100%,1fr)); */
 }
 .unmute{
   background: white;
