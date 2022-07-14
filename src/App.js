@@ -44,7 +44,7 @@ function App() {
         :
         <Routes>
           <Route path='/' element={<Login user={user}></Login>} />
-
+          <Route path='*' element={<Login user={user}></Login>} />
         </Routes>
       }
 

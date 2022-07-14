@@ -12,6 +12,8 @@ const socket = io.connect(socketURL);
 let checkpeer = {};
 
 export default function Meeting({ user }) {
+
+
   const [refresh, setRefresh] = useState(false);
   const { uid } = useParams();
   const [peerid, setPeerId] = useState("");
@@ -28,6 +30,7 @@ export default function Meeting({ user }) {
 
   const toggleRefresh = () => setRefresh((p) => !p);
   const loadUser = () => {
+    
     setClients([]);
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: false })
@@ -116,12 +119,12 @@ export default function Meeting({ user }) {
   });
   return (
     <>
-    <Modal room={uid}></Modal>
+    <Modal room={uid} user={user} url={window.location.href}></Modal>
       <div className="position-relative">
         <div className=" position-fixed bottom-50">
         <button
           type="button"
-          className="btn btn-success"
+          className="btn btn-success rounded-0"
           data-bs-toggle="modal"
           data-bs-target="#exampleModal"
         >
@@ -193,8 +196,8 @@ export default function Meeting({ user }) {
             })}
           </div>
 
-          <div className="d-flex justify-content-center">
-            <div className="d-flex justify-content-center position-fixed bottom-0">
+          <div className="d-flex justify-content-center ">
+            <div className="d-flex justify-content-center position-fixed bottom-0 container bg-success w-100">
               <div
                 onClick={() => {
                   mute();
