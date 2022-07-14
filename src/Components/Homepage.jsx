@@ -2,7 +2,8 @@ import React from "react";
 import { useState } from "react";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import randomstring from "randomstring";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Peer from "peerjs";
 import io from "socket.io-client";
 import { Link, useNavigate } from "react-router-dom";
@@ -22,8 +23,14 @@ const OnInputChange = e=>{
   setInputs({...inputs,[e.target.name]:e.target.value}); 
 };
 const joinMeeting = () =>{
-  console.log(inputs);
-  navigate(`/meeting/${inputs.meeting_link}`);
+  if(inputs.meeting_link==="")
+  {
+   toast.warning('Please enter meeting code')
+  }
+  else{
+    navigate(`/meeting/${inputs.meeting_link}`);
+
+  }
 }
   useEffect(() => {
     setMeetingId(uuidv4());
@@ -74,7 +81,7 @@ const joinMeeting = () =>{
               
                 </div>
                 <div className="col d-flex align-items-center justify-content-center">
-                <div className="  text-success text-decoration-underline" onClick={joinMeeting}>join</div>
+                <div className="  text-success text-decoration-underline" onClick={joinMeeting} style={{cursor:"pointer"}}>join</div>
                 </div>
               </div>
             </div>
@@ -94,6 +101,7 @@ const joinMeeting = () =>{
       </div>
       
     </div>
+    <ToastContainer theme="colored" />
     </>
     
   );

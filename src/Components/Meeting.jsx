@@ -6,18 +6,18 @@ import Peer from "peerjs";
 import io from "socket.io-client";
 import { useRef } from "react";
 import Modal from "./Modal";
+import MeetingList from "./MeetingList";
 const socketURL = "http://localhost:5000";
 const socket = io.connect(socketURL);
 
 let checkpeer = {};
 
 export default function Meeting({ user }) {
-
-
   const [refresh, setRefresh] = useState(false);
   const { uid } = useParams();
   const [peerid, setPeerId] = useState("");
   const [col, setCol] = useState("col-md-8");
+  const [meetingList,setMeetingList] = useState([])
 
   const navigate = useNavigate();
   let [clients, setClients] = useState([]);
@@ -30,7 +30,6 @@ export default function Meeting({ user }) {
 
   const toggleRefresh = () => setRefresh((p) => !p);
   const loadUser = () => {
-    
     setClients([]);
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: false })
@@ -38,38 +37,46 @@ export default function Meeting({ user }) {
         setMyStreamId(stream.id);
         uniqueStreamId = stream.id;
         setMyStreamVideo(stream);
-        addVideoStream(col, stream);
+        addVideoStream(user, stream);
         peer.on("call", (call) => {
-          call.answer(stream);
-          call.on("stream", (userVideoStream) => {
-            addVideoStream(col, userVideoStream);
+          call.answer(stream,user);
+          call.on("stream", (userVideoStream,myDetails) => {
+      
+            addVideoStream(user, userVideoStream);
           });
         });
         socket.off().on("user-connected", (data) => {
-          connectToNewUser(data.id, stream);
+          connectToNewUser(data.id, stream,data.user);
         });
       });
     peer.on("open", (id) => {
       setPeerId(id);
-      socket.emit("join_room", { room: uid, id: id, streamId: uniqueStreamId });
+      socket.emit("join_room", { room: uid, id: id, streamId: uniqueStreamId,user:user });
     });
   };
+
+
 
   useEffect(() => {
     loadUser();
   }, [refresh]);
 
-  function connectToNewUser(data, stream) {
-    const call = peer.call(data, stream);
+  function connectToNewUser(data, stream,userDetails) {
+    console.log("connected");
+    const call = peer.call(data, stream,user);
     call.on("stream", (userVideoStream) => {
-      addVideoStream(col, userVideoStream);
+      
+      addVideoStream(userDetails, userVideoStream);
     });
     call.on("close", () => {});
 
     checkpeer[data] = call;
   }
-  function addVideoStream(col, stream) {
+  function addVideoStream(user, stream) {
+  
     setClients((current) => [...current, stream]);
+    setMeetingList((current) => [...current, user]);
+
   }
 
   socket.on("user-disconnected", (data) => {
@@ -119,21 +126,13 @@ export default function Meeting({ user }) {
   });
   return (
     <>
-    <Modal room={uid} user={user} url={window.location.href}></Modal>
+      <Modal room={uid} user={user} url={window.location.href}></Modal>
+      <MeetingList meetingList={meetingList}/>
       <div className="position-relative">
-        <div className=" position-fixed bottom-50">
-        <button
-          type="button"
-          className="btn btn-success rounded-0"
-          data-bs-toggle="modal"
-          data-bs-target="#exampleModal"
-        >
-         <i className="fa-solid fa-arrow-right"></i>
-        </button>
-        </div>
+      
         <div
           style={{ height: "100%", overflow: "auto" }}
-          className="position-relative container "
+          className="position-relative container p-0 "
         >
           {/*       
         <div className="row gx-2" id="rows">
@@ -182,8 +181,9 @@ export default function Meeting({ user }) {
             {clients.map((element, index) => {
               return (
                 <>
+                
                   <div className="w-100" id={element.id} key={index}>
-                  
+                  <div>{element.id}</div>
                     <video
                       ref={(video) => {
                         if (video) video.srcObject = element;
@@ -197,27 +197,43 @@ export default function Meeting({ user }) {
           </div>
 
           <div className="d-flex justify-content-center ">
-            <div className="d-flex justify-content-center position-fixed bottom-0 container bg-success w-100">
-              <div
-                onClick={() => {
-                  mute();
-                }}
-              >
-                {isMuted ? (
-                  <i className="fa-solid  fa-microphone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
-                ) : (
-                  <i className="fa-solid  fa-microphone unmute bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
-                )}
+            <div
+              className="d-flex justify-content-between position-fixed bottom-0  p-2 container w-100"
+              style={{ background: "rgba(0, 0, 0, 0.5)" }}
+            >
+              <div className="d-flex align-items">
+                <div data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  <div>
+                  <i className="fa-solid  fa-shapes call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
+                  </div>
+                </div>
               </div>
-              <div onClick={stopVideo}>
-                {isDisplay ? (
-                  <i className="fa-solid  fa-video-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
-                ) : (
-                  <i className="fa-solid  fa-video call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
-                )}
+              <div className="d-flex ">
+                <div
+                className="me-2"
+                  onClick={() => {
+                    mute();
+                  }}
+                >
+                  {isMuted ? (
+                    <i className="fa-solid  fa-microphone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+                  ) : (
+                    <i className="fa-solid  fa-microphone unmute bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
+                  )}
+                </div>
+                <div className="me-2" onClick={stopVideo}>
+                  {isDisplay ? (
+                    <i className="fa-solid  fa-video-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+                  ) : (
+                    <i className="fa-solid  fa-video call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
+                  )}
+                </div>
+                <div onClick={closeMeeting}>
+                  <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+                </div>
               </div>
-              <div onClick={closeMeeting}>
-                <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+              <div data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+                <i className="fa-solid  fa-user call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
               </div>
             </div>
           </div>
