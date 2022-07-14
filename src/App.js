@@ -12,7 +12,7 @@ function App() {
 
   const [refresh, setRefresh] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [user, setUser] = useState(false)
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     fetchUser();
@@ -37,13 +37,13 @@ function App() {
      
         <Routes>
           <Route path='/' element={<Homepage user={user}></Homepage>} />
-          <Route path='/meeting/:uid' element={<Meeting></Meeting>} />
+          <Route path='/meeting/:uid' element={<Meeting user={user}></Meeting>} />
         </Routes>
       </>
       
         :
         <Routes>
-          <Route path='/' element={<Login></Login>} />
+          <Route path='/' element={<Login user={user}></Login>} />
 
         </Routes>
       }

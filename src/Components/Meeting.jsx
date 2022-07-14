@@ -5,12 +5,13 @@ import { useEffect } from "react";
 import Peer from "peerjs";
 import io from "socket.io-client";
 import { useRef } from "react";
+import Modal from "./Modal";
 const socketURL = "http://localhost:5000";
 const socket = io.connect(socketURL);
 
 let checkpeer = {};
 
-export default function Meeting() {
+export default function Meeting({ user }) {
   const [refresh, setRefresh] = useState(false);
   const { uid } = useParams();
   const [peerid, setPeerId] = useState("");
@@ -115,11 +116,23 @@ export default function Meeting() {
   });
   return (
     <>
-      <div
-        style={{ height: "100%", overflow: "auto" }}
-        className="position-relative container "
-      >
-        {/*       
+    <Modal room={uid}></Modal>
+      <div className="position-relative">
+        <div className=" position-fixed bottom-50">
+        <button
+          type="button"
+          className="btn btn-success"
+          data-bs-toggle="modal"
+          data-bs-target="#exampleModal"
+        >
+         <i className="fa-solid fa-arrow-right"></i>
+        </button>
+        </div>
+        <div
+          style={{ height: "100%", overflow: "auto" }}
+          className="position-relative container "
+        >
+          {/*       
         <div className="row gx-2" id="rows">
           
           {clients.map((element, index) => {
@@ -162,46 +175,47 @@ export default function Meeting() {
           })}
         </div> */}
 
-        <div className="grid-system" id="rows">
-          {clients.map((element, index) => {
-            return (
-              <>
-                <div className="w-100" id={element.id} key={index}>
-                  {element.id}
-                  <video
-                    ref={(video) => {
-                      if (video) video.srcObject = element;
-                    }}
-                    autoPlay
-                  ></video>
-                </div>
-              </>
-            );
-          })}
-        </div>
+          <div className="grid-system" id="rows">
+            {clients.map((element, index) => {
+              return (
+                <>
+                  <div className="w-100" id={element.id} key={index}>
+                  
+                    <video
+                      ref={(video) => {
+                        if (video) video.srcObject = element;
+                      }}
+                      autoPlay
+                    ></video>
+                  </div>
+                </>
+              );
+            })}
+          </div>
 
-        <div className="d-flex justify-content-center">
-          <div className="d-flex justify-content-center position-fixed bottom-0">
-            <div
-              onClick={() => {
-                mute();
-              }}
-            >
-              {isMuted ? (
-                <i className="fa-solid  fa-microphone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
-              ) : (
-                <i className="fa-solid  fa-microphone unmute bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
-              )}
-            </div>
-            <div onClick={stopVideo}>
-              {isDisplay ? (
-                <i className="fa-solid  fa-video-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
-              ) : (
-                <i className="fa-solid  fa-video call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
-              )}
-            </div>
-            <div onClick={closeMeeting}>
-              <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+          <div className="d-flex justify-content-center">
+            <div className="d-flex justify-content-center position-fixed bottom-0">
+              <div
+                onClick={() => {
+                  mute();
+                }}
+              >
+                {isMuted ? (
+                  <i className="fa-solid  fa-microphone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+                ) : (
+                  <i className="fa-solid  fa-microphone unmute bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
+                )}
+              </div>
+              <div onClick={stopVideo}>
+                {isDisplay ? (
+                  <i className="fa-solid  fa-video-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+                ) : (
+                  <i className="fa-solid  fa-video call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
+                )}
+              </div>
+              <div onClick={closeMeeting}>
+                <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
+              </div>
             </div>
           </div>
         </div>

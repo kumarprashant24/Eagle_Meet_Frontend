@@ -63,16 +63,18 @@ const joinMeeting = () =>{
                 </div>
               </div>
 
-              <div className="row gx-2">
-                <Link to={`/meeting/${meetingId}`} className="col-md-6">
+              <div className="row gx-2 gy-2">
+                <Link to={`/meeting/${meetingId}`} className="col-md-5">
                   <button className="btn btn-success p-3 w-100"><i className="fa-solid fa-video me-2"></i>New Meeting</button>
                 </Link>
-                <div className="col-md-6">
+                <div className="col-md-5">
                   <div className="d-flex">
-                  <input type="email" class="form-control p-3" name="meeting_link" value={inputs.meeting_link}  onChange={(e)=>OnInputChange(e)} id="exampleFormControlInput1" placeholder="Meeting Link"/>
-                <div className="d-flex align-items-center ms-2 text-success text-decoration-underline" onClick={joinMeeting}>join</div>
+                  <input type="email" className="form-control p-3" name="meeting_link" value={inputs.meeting_link}  onChange={(e)=>OnInputChange(e)} id="exampleFormControlInput1" placeholder="Enter Meeting Code"/>
                   </div>
               
+                </div>
+                <div className="col d-flex align-items-center justify-content-center">
+                <div className="  text-success text-decoration-underline" onClick={joinMeeting}>join</div>
                 </div>
               </div>
             </div>
