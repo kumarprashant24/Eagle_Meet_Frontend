@@ -17,7 +17,7 @@ export default function Meeting({ user }) {
   const { uid } = useParams();
   const [peerid, setPeerId] = useState("");
   const [col, setCol] = useState("col-md-8");
-  const [meetingList,setMeetingList] = useState([])
+  const [meetingList, setMeetingList] = useState([]);
 
   const navigate = useNavigate();
   let [clients, setClients] = useState([]);
@@ -31,6 +31,7 @@ export default function Meeting({ user }) {
   const toggleRefresh = () => setRefresh((p) => !p);
   const loadUser = () => {
     setClients([]);
+
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: false })
       .then((stream) => {
@@ -38,34 +39,39 @@ export default function Meeting({ user }) {
         uniqueStreamId = stream.id;
         setMyStreamVideo(stream);
         addVideoStream(user, stream);
+
         peer.on("call", (call) => {
-          call.answer(stream,user);
-          call.on("stream", (userVideoStream,myDetails) => {
-      
-            addVideoStream(user, userVideoStream);
+          call.answer(stream, user);
+
+          call.on("stream", (userVideoStream) => {
+            addVideoStream(call.metadata.user, userVideoStream);
           });
         });
         socket.off().on("user-connected", (data) => {
-          connectToNewUser(data.id, stream,data.user);
+          connectToNewUser(data.id, stream, data.user);
         });
       });
     peer.on("open", (id) => {
       setPeerId(id);
-      socket.emit("join_room", { room: uid, id: id, streamId: uniqueStreamId,user:user });
+      socket.emit("join_room", {
+        room: uid,
+        id: id,
+        streamId: uniqueStreamId,
+        user: user,
+        anotherUser: {},
+      });
     });
   };
-
-
 
   useEffect(() => {
     loadUser();
   }, [refresh]);
 
-  function connectToNewUser(data, stream,userDetails) {
-    console.log("connected");
-    const call = peer.call(data, stream,user);
+  function connectToNewUser(data, stream, userDetails) {
+   
+    const options = { metadata: { user: user } };
+    const call = peer.call(data, stream, options);
     call.on("stream", (userVideoStream) => {
-      
       addVideoStream(userDetails, userVideoStream);
     });
     call.on("close", () => {});
@@ -73,10 +79,8 @@ export default function Meeting({ user }) {
     checkpeer[data] = call;
   }
   function addVideoStream(user, stream) {
-  
     setClients((current) => [...current, stream]);
     setMeetingList((current) => [...current, user]);
-
   }
 
   socket.on("user-disconnected", (data) => {
@@ -120,18 +124,17 @@ export default function Meeting({ user }) {
     navigate("/");
   };
   socket.on("user-leave", (data) => {
-    console.log(checkpeer);
     if (checkpeer[data.peerId]) checkpeer[data.peerId].close();
     document.getElementById(data.streamId).remove();
   });
   return (
     <>
-      <Modal room={uid} user={user} url={window.location.href}></Modal>
-      <MeetingList meetingList={meetingList}/>
-      <div className="position-relative">
-      
+      <div className="bg-dark">
+        <Modal room={uid} user={user} url={window.location.href}></Modal>
+        <MeetingList meetingList={meetingList} />
+
         <div
-          style={{ height: "100%", overflow: "auto" }}
+          style={{ height: "100vh", overflow: "auto" }}
           className="position-relative container p-0 "
         >
           {/*       
@@ -181,9 +184,8 @@ export default function Meeting({ user }) {
             {clients.map((element, index) => {
               return (
                 <>
-                
                   <div className="w-100" id={element.id} key={index}>
-                  <div>{element.id}</div>
+                    
                     <video
                       ref={(video) => {
                         if (video) video.srcObject = element;
@@ -204,13 +206,13 @@ export default function Meeting({ user }) {
               <div className="d-flex align-items">
                 <div data-bs-toggle="modal" data-bs-target="#exampleModal">
                   <div>
-                  <i className="fa-solid  fa-shapes call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
+                    <i className="fa-solid  fa-shapes corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
                   </div>
                 </div>
               </div>
-              <div className="d-flex ">
+              <div className="d-flex align-items-center">
                 <div
-                className="me-2"
+                  className="me-2"
                   onClick={() => {
                     mute();
                   }}
@@ -232,8 +234,15 @@ export default function Meeting({ user }) {
                   <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
                 </div>
               </div>
-              <div data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
-                <i className="fa-solid  fa-user call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
+
+              <div
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasRight"
+                aria-controls="offcanvasRight"
+              >
+                <div>
+                  <i className="fa-solid  fa-user corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
+                </div>
               </div>
             </div>
           </div>

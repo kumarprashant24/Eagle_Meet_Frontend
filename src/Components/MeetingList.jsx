@@ -15,7 +15,7 @@ console.log(meetingList);
   <div className="offcanvas-body">
     {meetingList.map((element)=>{
         return <>
-        <div className='d-flex align-items-center'>
+        <div className='d-flex align-items-center mb-2 border-bottom p-2'>
             <div><img className='tiny_pic' src={element.picture_url}/></div>
             <div className='ms-3'>{element.firstname+" "+element.lastname}</div>
         </div>
