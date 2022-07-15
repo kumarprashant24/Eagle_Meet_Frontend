@@ -7,6 +7,7 @@ import io from "socket.io-client";
 import { useRef } from "react";
 import Modal from "./Modal";
 import MeetingList from "./MeetingList";
+import Chat from "./Chat";
 const socketURL = "http://localhost:5000";
 const socket = io.connect(socketURL);
 
@@ -68,7 +69,6 @@ export default function Meeting({ user }) {
   }, [refresh]);
 
   function connectToNewUser(data, stream, userDetails) {
-   
     const options = { metadata: { user: user } };
     const call = peer.call(data, stream, options);
     call.on("stream", (userVideoStream) => {
@@ -131,7 +131,8 @@ export default function Meeting({ user }) {
     <>
       <div className="bg-dark">
         <Modal room={uid} user={user} url={window.location.href}></Modal>
-        <MeetingList meetingList={meetingList} />
+        <MeetingList meetingList={meetingList}  />
+        <Chat room={uid} user={user}></Chat>
 
         <div
           style={{ height: "100vh", overflow: "auto" }}
@@ -185,7 +186,6 @@ export default function Meeting({ user }) {
               return (
                 <>
                   <div className="w-100" id={element.id} key={index}>
-                    
                     <video
                       ref={(video) => {
                         if (video) video.srcObject = element;
@@ -204,9 +204,16 @@ export default function Meeting({ user }) {
               style={{ background: "rgba(0, 0, 0, 0.5)" }}
             >
               <div className="d-flex align-items">
-                <div data-bs-toggle="modal" data-bs-target="#exampleModal">
-                  <div>
-                    <i className="fa-solid  fa-shapes corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
+                <div className="d-flex">
+                  <div data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <div>
+                      <i className="fa-solid  fa-shapes corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
+                    </div>
+                  </div>
+                  <div >
+                    <div>
+                      <i className="fa-solid  fa-circle-info corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -234,14 +241,24 @@ export default function Meeting({ user }) {
                   <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
                 </div>
               </div>
-
-              <div
-                data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasRight"
-                aria-controls="offcanvasRight"
-              >
-                <div>
-                  <i className="fa-solid  fa-user corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
+              <div className="d-flex">
+                <div
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#offcanvasRight"
+                  aria-controls="offcanvasRight"
+                >
+                  <div>
+                    <i className="fa-solid  fa-user corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
+                  </div>
+                </div>
+                <div
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#chatoffcanvasRight"
+                  aria-controls="chatoffcanvasRight"
+                >
+                  <div>
+                    <i className="fa-solid  fa-message corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
+                  </div>
                 </div>
               </div>
             </div>
