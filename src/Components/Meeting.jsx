@@ -84,7 +84,7 @@ export default function Meeting({ user }) {
     checkpeer[data] = call;
   }
   function addVideoStream(user, stream) {
-    setClients((current) => [...current, stream]);
+    setClients((current) => [...current, {stream:stream,user:user}]);
     setMeetingList((current) => [...current, {streamId:stream.id,user:user}]);
   }
 
@@ -179,17 +179,20 @@ export default function Meeting({ user }) {
                 <>
                   <div
                     className="w-100 position-relative"
-                    id={element.id}
+                    id={element.stream.id}
                     key={index}
                   >
                     <video
                       className="rounded-3"
                       ref={(video) => {
-                        if (video) video.srcObject = element;
+                        if (video) video.srcObject = element.stream;
                       }}
                       autoPlay
                     ></video>
-                    <div className="text-white"></div>
+                    <div className="d-flex position-absolute bottom-0 mb-4 ms-2">
+                      <img src={element.user.picture_url} className="tiny_pic"/>
+                    <div className="text-white d-flex align-items-center ms-2">{element.user.firstname+ " " + element.user.lastname}</div>
+                    </div>
 
                     {/* <div className="position-absolute  w-100 top-0" style={{zIndex:`${hideAvtar}`,height:"90%"}}>
                       <div
