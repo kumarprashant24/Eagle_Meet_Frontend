@@ -45,7 +45,7 @@ const joinMeeting = () =>{
           <div className="col-md-6 d-flex align-items-center">
             <div className="">
               <div className="">
-                <h1 className="">Secure Video Conferencing for everyone</h1>
+                <h1 className="main-heading">Secure Video Conferencing for everyone</h1>
                 <div className="">
                   Connect, collaborate, and celebrate from anywhere with Eagle
                   Meet

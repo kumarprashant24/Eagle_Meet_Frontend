@@ -84,7 +84,7 @@ export default function Meeting({ user }) {
     checkpeer[data] = call;
   }
   function addVideoStream(user, stream) {
-    setClients((current) => [...current, {stream:stream,user:user}]);
+    setClients((current) => [...current, {stream:stream,zIndex:"-1",user:user}]);
     setMeetingList((current) => [...current, {streamId:stream.id,user:user}]);
   }
 
@@ -97,8 +97,6 @@ export default function Meeting({ user }) {
     );
     document.getElementById(data.streamId).remove();
   
-    
-
   });
 
   const mute = () => {
@@ -114,35 +112,42 @@ export default function Meeting({ user }) {
   const stopVideo = (streamId, streamVideo) => {
     if (isDisplay === false) {
       console.log("off");
+      socket.emit("off-video", {
+        room: uid,
+        streamId: streamId,
+      
+        zIndex:"1"
+      });
       myStreamVideo.getTracks()[0].enabled = false;
       setHideAvtar(10);
       setIsDisplay(true);
     } else {
       setHideAvtar(-1);
       console.log("on");
-
+      socket.emit("off-video", {
+        room: uid,
+        streamId: streamId,
+        zIndex:"-1"
+      });
+  
       myStreamVideo.getTracks()[0].enabled = true;
       
       setIsDisplay(false);
     }
 
-    socket.emit("off-video", {
-      room: uid,
-      streamId: streamId,
-      userId: user._id,
-      peerid: peerid,
-    });
+  
   };
   socket.off("set-default-video").on("set-default-video", (data) => {
-    setOffStreamId(data.streamId);
+ 
+    setClients(current =>
+        current.map(obj => {
+          if (obj.stream.id === data.streamId) {
+            return {...obj, zIndex:data.zIndex};
+          }
+          return obj;
+        }),
+      );
 
-    // clients.map((element)=>{
-
-    //   if(element.id === data.streamId)
-    //   {
-    //     offStreamVideo= element
-    //   }
-    // })
   });
   const closeMeeting = () => {
     socket.emit("call-ended", {
@@ -164,16 +169,16 @@ export default function Meeting({ user }) {
 
   return (
     <>
-      <div className="bg-dark">
+      <div className="bg-dark" style={{height:"100%"}}>
         <Modal room={uid} user={user} url={window.location.href}></Modal>
         <MeetingList meetingList={meetingList} />
         <Chat room={uid} user={user}></Chat>
 
         <div
-          style={{ height:"91.1vh", overflow: "auto" }}
+          style={{ height:"90vh", overflow: "auto" }}
           className="position-relative container p-0 "
         >
-          <div className="grid-system" id="rows">
+          <div className="grid-system mt-2" id="rows">
             {clients.map((element, index) => {
               return (
                 <>
@@ -189,19 +194,13 @@ export default function Meeting({ user }) {
                       }}
                       autoPlay
                     ></video>
-                    <div className="d-flex position-absolute bottom-0 mb-4 ms-2">
-                      <img src={element.user.picture_url} className="tiny_pic"/>
-                    <div className="text-white d-flex align-items-center ms-2">{element.user.firstname+ " " + element.user.lastname}</div>
+                    <div className=" position-absolute top-0 w-100 h-100  d-flex justify-content-center align-items-center">
+                      <img src={element.user.picture_url} className="avtar " style={{zIndex:`${element.zIndex}`}}/>
                     </div>
-
-                    {/* <div className="position-absolute  w-100 top-0" style={{zIndex:`${hideAvtar}`,height:"90%"}}>
-                      <div
-                        className="d-flex  justify-content-center align-items-center"
-                        style={{ height: "100%" }}
-                      >
-                        <img src={user.picture_url} className="avtar" />
-                      </div>
-                    </div> */}
+                    <div className="d-flex position-absolute bottom-0 mb-3 ms-2">
+                      <img src={element.user.picture_url} className="tag"/>
+                    <div className="text-white fw-bold d-flex align-items-center ms-2">{element.user.firstname+ " " + element.user.lastname}</div>
+                    </div>
                   </div>
                 </>
               );
@@ -210,7 +209,7 @@ export default function Meeting({ user }) {
 
         
         </div>
-        <div className="d-flex justify-content-center ">
+        <div className="d-flex justify-content-center mt-2 position-absolute bottom-0 w-100 ">
             <div
               className="d-flex row justify-content-between  p-2 container-fluid"
               style={{ background: "rgba(0, 0, 0, 0.5)" }}

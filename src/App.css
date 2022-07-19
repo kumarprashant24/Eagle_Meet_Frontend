@@ -63,6 +63,19 @@ video{
   width: 90px;
   clip-path: circle(50%);
 }
+.main-heading{
+  font-family: "Google Sans Display",Roboto,Arial,sans-serif;
+  font-size: 2.75rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 3.25rem;
+  padding-bottom: 0.5em;
+}
+.tag{
+  height: 30px;
+  width: 30px;
+  clip-path: circle(50%);
+}
 .obj{
   object-fit: cover;
 }
