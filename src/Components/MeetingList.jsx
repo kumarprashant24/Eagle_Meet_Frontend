@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 export default function MeetingList({ meetingList }) {
   useEffect(() => {
-    console.log(meetingList);
+    console.log(meetingList)
   }, []);
   return (
     <>
@@ -28,10 +28,10 @@ export default function MeetingList({ meetingList }) {
               <>
                 <div className="d-flex align-items-center mb-2 border-bottom p-2">
                   <div>
-                    <img className="tiny_pic" src={element.picture_url} />
+                    <img className="tiny_pic" src={element.user.picture_url} />
                   </div>
                   <div className="ms-3">
-                    {element.firstname + " " + element.lastname}
+                    {element.user.firstname + " " + element.user.lastname}
                   </div>
                 </div>
               </>

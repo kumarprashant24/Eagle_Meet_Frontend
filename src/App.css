@@ -58,7 +58,11 @@ video{
 .round-img {
   clip-path: circle();
 }
-
+.avtar{
+  height: 90px;
+  width: 90px;
+  clip-path: circle(50%);
+}
 .obj{
   object-fit: cover;
 }
