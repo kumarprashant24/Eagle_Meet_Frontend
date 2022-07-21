@@ -1,7 +1,6 @@
 import React from "react";
 import { useRef } from "react";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import {  toast } from 'react-toastify';
 
 export default function Modal({ room,user ,url}) {
     const codeText =useRef();
@@ -74,7 +73,6 @@ export default function Modal({ room,user ,url}) {
         </div>
       </div>
     </div>
-    <ToastContainer theme="colored" />
     </>
     
   );

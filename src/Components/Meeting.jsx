@@ -6,8 +6,10 @@ import Peer from "peerjs";
 import io from "socket.io-client";
 import { useRef } from "react";
 import Modal from "./Modal";
+import { toast } from "react-toastify";
 import MeetingList from "./MeetingList";
 import Chat from "./Chat";
+import LeaveMeeting from "./LeaveMeeting";
 const socketURL = "http://localhost:5000";
 const socket = io.connect(socketURL);
 
@@ -33,7 +35,7 @@ export default function Meeting({ user }) {
   let uniqueStreamId = "";
   const peer = new Peer();
   const [hideAvtar, setHideAvtar] = useState(-1);
-
+  const toastId = React.useRef(null);
   const toggleRefresh = () => setRefresh((p) => !p);
   const loadUser = () => {
     setClients([]);
@@ -71,6 +73,7 @@ export default function Meeting({ user }) {
 
   useEffect(() => {
     loadUser();
+   
   }, [refresh]);
 
   function connectToNewUser(data, stream, userDetails) {
@@ -86,7 +89,7 @@ export default function Meeting({ user }) {
   function addVideoStream(user, stream) {
     setClients((current) => [
       ...current,
-      { stream: stream, zIndex: "-1", zIndexMic:"-1" , user: user },
+      { stream: stream, zIndex: "-1", zIndexMic: "-1", user: user },
     ]);
     setMeetingList((current) => [
       ...current,
@@ -94,19 +97,26 @@ export default function Meeting({ user }) {
     ]);
   }
 
-  socket.on("user-disconnected", (data) => {
+  socket.off("user-disconnected").on("user-disconnected", (data) => {
+    
     if (checkpeer[data.id]) checkpeer[data.id].close();
     setMeetingList((current) =>
       current.filter((employee) => {
         return employee.streamId !== data.streamId;
       })
     );
-    document.getElementById(data.streamId).remove();
+    setClients((current) =>
+      current.filter((element) => {
+        return element.stream.id !== data.streamId;
+      })
+    );
+    toast.info(`${data.user.firstname} ${data.user.lastname} left meeting`, { position: "bottom-left" });
+  
+    // document.getElementById(data.streamId).remove();
   });
 
   const mute = (streamId, streamVideo) => {
     if (isMuted === false) {
-      
       // myStreamVideo.getTracks()[0].enabled = false;
       socket.emit("off-mic", {
         room: uid,
@@ -177,66 +187,80 @@ export default function Meeting({ user }) {
       room: uid,
       streamId: myStreamId,
       peerId: peerid,
+      name: `${user.firstname} ${user.lastname}`,
     });
     myStreamVideo.getTracks().forEach(function (track) {
       track.stop();
     });
     navigate("/");
   };
-  socket.on("user-leave", (data) => {
+  socket.off("user-leave").on("user-leave", (data) => {
     if (checkpeer[data.peerId]) checkpeer[data.peerId].close();
-    document.getElementById(data.streamId).remove();
+
+    setClients((current) =>
+      current.filter((element) => {
+        return element.stream.id !== data.streamId;
+      })
+    );
+    // document.getElementById(data.streamId).remove();
+    toast.info(`${data.name} left  meeting`, { position: "bottom-left" });
   });
 
   return (
     <>
-      <div className="bg-dark" style={{ height: "100%" }}>
+      <div className="bg-dark position-relative" style={{ height: "100%" }}>
         <Modal room={uid} user={user} url={window.location.href}></Modal>
         <MeetingList meetingList={meetingList} />
         <Chat room={uid} user={user}></Chat>
-
-        <div
-          style={{ height: "90vh", overflow: "auto" }}
-          className="position-relative container p-0 "
-        >
-          <div className="grid-system mt-2" id="rows">
-            {clients.map((element, index) => {
-              return (
-                <>
-                  <div
-                    className="w-100 position-relative"
-                    id={element.stream.id}
-                    key={index}
-                  >
-                    <video
-                      className="rounded-3"
-                      ref={(video) => {
-                        if (video) video.srcObject = element.stream;
-                      }}
-                      autoPlay
-                    ></video>
-                    <div className=" position-absolute top-0 w-100 h-100  d-flex justify-content-center align-items-center">
-                      <img
-                        src={element.user.picture_url}
-                        className="avtar "
-                        style={{ zIndex: `${element.zIndex}` }}
-                      />
-                    </div>
-                    <div className="position-absolute top-0 end-0" style={{ zIndex: `${element.zIndexMic}` }}>
-                    <i className="fa-solid fa-microphone-slash text-white me-2 mt-2 corner   round-img bg-secondary"  ></i>
-                    </div>
-                    <div className="d-flex position-absolute bottom-0 mb-3 ms-2">
-                      <img src={element.user.picture_url} className="tag" />
-                      <div className="text-white fw-bold d-flex align-items-center ms-2">
-                        {element.user.firstname + " " + element.user.lastname}
+      
+          <div
+            style={{ height: "89vh", overflow: "auto" }}
+            className="position-relative container p-0 "
+          >
+            <div className="grid-system mt-2" id="rows">
+              {clients.map((element, index) => {
+                return (
+                  <>
+                    {/* <div className="text-white">{clients.length}</div> */}
+                    <div
+                      className="w-100 position-relative"
+                      id={element.stream.id}
+                      key={index}
+                    >
+                      <video
+                        className="rounded-3"
+                        ref={(video) => {
+                          if (video) video.srcObject = element.stream;
+                        }}
+                        autoPlay
+                      ></video>
+                      <div className=" position-absolute top-0 w-100 h-100  d-flex justify-content-center align-items-center">
+                        <img
+                          src={element.user.picture_url}
+                          className="avtar "
+                          style={{ zIndex: `${element.zIndex}` }}
+                        />
+                      </div>
+                      <div
+                        className="position-absolute top-0 end-0"
+                        style={{ zIndex: `${element.zIndexMic}` }}
+                      >
+                        <i className="fa-solid fa-microphone-slash text-white me-2 mt-2 corner   round-img bg-secondary"></i>
+                      </div>
+                      <div className="d-flex position-absolute bottom-0 mb-3 ms-2">
+                        <img src={element.user.picture_url} className="tag" />
+                        <div className="text-white fw-bold d-flex align-items-center ms-2">
+                          {element.user.firstname + " " + element.user.lastname}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </>
-              );
-            })}
+                  </>
+                );
+              })}
+            </div>
           </div>
-        </div>
+    
+
         <div className="d-flex justify-content-center mt-2 position-absolute bottom-0 w-100 ">
           <div
             className="d-flex row justify-content-between  p-2 container-fluid"
@@ -245,12 +269,12 @@ export default function Meeting({ user }) {
             <div className="d-flex align-items col justify-content-center ms-3">
               <div className="d-flex">
                 <div data-bs-toggle="modal" data-bs-target="#exampleModal">
-                  <div>
+                  <div style={{cursor:"pointer"}}>
                     <i className="fa-solid  fa-shapes corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
                   </div>
                 </div>
                 <div>
-                  <div>
+                  <div style={{cursor:"pointer"}}>
                     <i className="fa-solid  fa-circle-info corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
                   </div>
                 </div>
@@ -259,6 +283,7 @@ export default function Meeting({ user }) {
             <div className="d-flex align-items-center justify-content-center col">
               <div
                 className="me-2"
+                style={{cursor:"pointer"}}  
                 onClick={() => {
                   mute(myStreamId, myStreamVideo);
                 }}
@@ -271,6 +296,7 @@ export default function Meeting({ user }) {
               </div>
               <div
                 className="me-2"
+                style={{cursor:"pointer"}}
                 onClick={() => {
                   stopVideo(myStreamId, myStreamVideo);
                 }}
@@ -281,7 +307,7 @@ export default function Meeting({ user }) {
                   <i className="fa-solid  fa-video call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
                 )}
               </div>
-              <div onClick={closeMeeting}>
+              <div onClick={closeMeeting} style={{cursor:"pointer"}}>
                 <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
               </div>
             </div>
@@ -290,18 +316,26 @@ export default function Meeting({ user }) {
                 data-bs-toggle="offcanvas"
                 data-bs-target="#offcanvasRight"
                 aria-controls="offcanvasRight"
+                className="d-flex justify-content-center align-items-center me-3"
               >
-                <div>
-                  <i className="fa-solid  fa-user corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
+                <div className="d-flex justify-content-center align-items-center" style={{cursor:"pointer"}}>
+                  <box-icon name="user" color="white" size="md"></box-icon>
+                  {/* <i className="fa-solid  fa-user corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i> */}
                 </div>
               </div>
               <div
                 data-bs-toggle="offcanvas"
                 data-bs-target="#chatoffcanvasRight"
                 aria-controls="chatoffcanvasRight"
+                className="d-flex justify-content-center align-items-center"
               >
-                <div>
-                  <i className="fa-solid  fa-message corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
+                <div className="d-flex justify-content-center align-items-center" style={{cursor:"pointer"}}>
+                  <box-icon
+                    name="conversation"
+                    color="white"
+                    size="md"
+                  ></box-icon>
+                  {/* <i className="fa-solid  fa-message corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i> */}
                 </div>
               </div>
             </div>

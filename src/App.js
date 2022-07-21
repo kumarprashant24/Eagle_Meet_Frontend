@@ -7,7 +7,8 @@ import axios from 'axios';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Login from './Components/Login';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 function App() {
 
   const [refresh, setRefresh] = useState(true);
@@ -38,6 +39,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Homepage user={user}></Homepage>} />
           <Route path='/meeting/:uid' element={<Meeting user={user}></Meeting>} />
+        
         </Routes>
       </>
       
@@ -47,7 +49,7 @@ function App() {
           <Route path='*' element={<Login user={user}></Login>} />
         </Routes>
       }
-
+  <ToastContainer theme="colored" />
     </BrowserRouter>
 
   );
