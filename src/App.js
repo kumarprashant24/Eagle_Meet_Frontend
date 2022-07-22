@@ -16,6 +16,8 @@ function App() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
+    console.log(process.env.REACT_APP_SERVER_URL);
+    
     fetchUser();
   }, [refresh]);
 

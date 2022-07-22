@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import MeetingList from "./MeetingList";
 import Chat from "./Chat";
 import LeaveMeeting from "./LeaveMeeting";
-const socketURL = "http://localhost:5000";
+const socketURL = process.env.REACT_APP_SERVER_URL;
 const socket = io.connect(socketURL);
 
 let checkpeer = {};
@@ -305,8 +305,8 @@ export default function Meeting({ user }) {
                 <>
                   {/* <div className="text-white">{clients.length}</div> */}
                   <div
-                    className="w-100 position-relative"
-                    style={clients.length===1?{height:"88vh"}:{height:"100%"}}
+                    className={clients.length===1?`w-100 position-relative single-col`:`w-100 position-relative h-100`}
+                    // style={clients.length===1?{height:"88vh"}:{height:"100%"}}
                     id={element.stream.id}
                     key={index}
                   >
@@ -330,9 +330,9 @@ export default function Meeting({ user }) {
                     >
                       <i className="fa-solid fa-microphone-slash text-white me-2 mt-2 corner   round-img bg-secondary"></i>
                     </div>
-                    <div className="d-flex position-absolute bottom-0 mb-3 ms-2">
+                    <div className="d-flex position-absolute bottom-0 mb-1 ms-2">
                       <img src={element.user.picture_url} className="tag" />
-                      <div className="text-white fw-bold d-flex align-items-center ms-2">
+                      <div className="text-white fw-bold d-flex align-items-center font-size ms-2">
                         {element.user.firstname + " " + element.user.lastname}
                       </div>
                     </div>
