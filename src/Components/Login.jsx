@@ -1,11 +1,11 @@
 import React from "react";
 import { useEffect } from "react";
 import Navbar from "./Navbar";
-
+import {SERVER_URL} from '../config';
 export default function Login({user}) {
   const GoogleAuth = (e) => {
     e.preventDefault();
-    window.open(`http://localhost:5000/api/auth/google`, "_self");
+    window.open(`${SERVER_URL}/api/auth/google`, "_self");
   };
 
 
@@ -41,7 +41,7 @@ export default function Login({user}) {
                   <div className="">
                     <div className="mt-5">
                       <button
-                        class="btn btn-outline-success"
+                        className="btn btn-outline-success"
                         type="submit"
                         onClick={GoogleAuth}
                       >
