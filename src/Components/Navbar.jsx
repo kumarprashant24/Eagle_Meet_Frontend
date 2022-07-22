@@ -52,6 +52,7 @@ export default function Navbar({ user }) {
                 <div
                   className="d-flex align-items-center"
                   onClick={handleLogout}
+                  style={{cursor:"pointer"}}
                 >
                   <i className="fa-solid fa-2x fa-arrow-right-from-bracket text-black-50"></i>
                 </div>

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 export default function MeetingList({ meetingList }) {
   useEffect(() => {
-    console.log(meetingList)
+    // console.log(meetingList)
   }, []);
   return (
     <>
