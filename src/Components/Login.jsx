@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import {SERVER_URL} from '../config';
 export default function Login({user}) {
   const GoogleAuth = (e) => {
+    console.log(SERVER_URL);
     e.preventDefault();
     window.open(`${SERVER_URL}/api/auth/google`, "_self");
   };
