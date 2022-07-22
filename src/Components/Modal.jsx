@@ -15,7 +15,7 @@ export default function Modal({ room,user ,url}) {
     <div
       className="modal fade"
       id="exampleModal"
-      tabindex="-1"
+     
       aria-labelledby="exampleModalLabel"
       aria-hidden="true"
     >

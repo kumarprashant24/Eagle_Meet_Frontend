@@ -25,7 +25,7 @@ export default function Chat({ room, user }) {
     <>
       <div
         className="offcanvas offcanvas-end"
-        tabindex="-1"
+       
         id="chatoffcanvasRight"
         aria-labelledby="offcanvasRightLabel"
       >

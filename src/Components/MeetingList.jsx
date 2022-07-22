@@ -9,7 +9,7 @@ export default function MeetingList({ meetingList }) {
     <>
       <div
         className="offcanvas offcanvas-end"
-        tabindex="-1"
+        
         id="offcanvasRight"
         aria-labelledby="offcanvasRightLabel"
       >
