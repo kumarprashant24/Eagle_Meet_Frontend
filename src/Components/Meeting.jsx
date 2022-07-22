@@ -10,7 +10,8 @@ import { toast } from "react-toastify";
 import MeetingList from "./MeetingList";
 import Chat from "./Chat";
 import LeaveMeeting from "./LeaveMeeting";
-const socketURL = process.env.REACT_APP_SERVER_URL;
+import {SERVER_URL} from '../config';
+const socketURL = SERVER_URL;
 const socket = io.connect(socketURL);
 
 let checkpeer = {};

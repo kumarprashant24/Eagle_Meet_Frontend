@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import Login from './Components/Login';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {SERVER_URL} from './config';
 function App() {
 
   const [refresh, setRefresh] = useState(true);
@@ -16,7 +17,7 @@ function App() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    console.log(process.env.REACT_APP_SERVER_URL);
+  
     
     fetchUser();
   }, [refresh]);
@@ -25,7 +26,7 @@ function App() {
 
   async function fetchUser() {
 
-    await axios.get(`http://localhost:5000/api/auth/login/success`, { withCredentials: true }).then((res)=>{
+    await axios.get(`${SERVER_URL}/api/auth/login/success`, { withCredentials: true }).then((res)=>{
       setIsSuccess(res.data.success);
       setUser(res.data.user)
    

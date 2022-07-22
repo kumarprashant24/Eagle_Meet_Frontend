@@ -2,11 +2,11 @@ import axios from "axios";
 import React from "react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-
+import {SERVER_URL} from '../config';
 export default function Navbar({ user }) {
   const handleLogout = async (e) => {
     e.preventDefault();
-    window.open(`http://localhost:5000/api/auth/logout`, "_self");
+    window.open(`${SERVER_URL}/api/auth/logout`, "_self");
   };
 
   // useEffect(() => {
