@@ -10,20 +10,20 @@ import { toast } from "react-toastify";
 import MeetingList from "./MeetingList";
 import Chat from "./Chat";
 import LeaveMeeting from "./LeaveMeeting";
-import {SERVER_URL} from '../config';
-const socketURL = SERVER_URL;
-const socket = io.connect(socketURL);
+import { SERVER_URL } from "../config";
+// const socketURL = SERVER_URL;
+const socket = io.connect(SERVER_URL);
 
 let checkpeer = {};
-let currentPeer = [];
+// let currentPeer = [];
 export default function Meeting({ user }) {
+  const [currentPeer, setCurrentPeer] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const { uid } = useParams();
   const [peerid, setPeerId] = useState("");
-  const [bigScreen,setBigScreen] = useState(null);
+  const [bigScreen, setBigScreen] = useState(null);
   const [meetingList, setMeetingList] = useState([]);
-  const [isSharing,setIsSharing] = useState(false)
-
+  const [isSharing, setIsSharing] = useState(false);
 
   const navigate = useNavigate();
   let [clients, setClients] = useState([]);
@@ -31,11 +31,12 @@ export default function Meeting({ user }) {
   const [myStreamVideo, setMyStreamVideo] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isDisplay, setIsDisplay] = useState(false);
+  const [presenting,setPresenting] = useState({});
 
   let uniqueStreamId = "";
   const peer = new Peer();
   const [hideAvtar, setHideAvtar] = useState(-1);
-  
+
   const toggleRefresh = () => setRefresh((p) => !p);
 
   const loadUser = () => {
@@ -53,8 +54,8 @@ export default function Meeting({ user }) {
           call.answer(stream, user);
 
           call.on("stream", (userVideoStream) => {
-            currentPeer.push(call.peerConnection);
-            console.log(currentPeer);
+            setCurrentPeer((current) => [...current, call.peerConnection]);
+
             addVideoStream(call.metadata.user, userVideoStream);
           });
         });
@@ -82,10 +83,7 @@ export default function Meeting({ user }) {
     const options = { metadata: { user: user } };
     const call = peer.call(data, stream, options);
     call.on("stream", (userVideoStream) => {
-      // currentPeer=call.peerConnection;
-      currentPeer.push(call.peerConnection);
-
-      console.log(currentPeer);
+      setCurrentPeer((current) => [...current, call.peerConnection]);
       addVideoStream(userDetails, userVideoStream);
     });
     call.on("close", () => {});
@@ -115,9 +113,12 @@ export default function Meeting({ user }) {
         return element.stream.id !== data.streamId;
       })
     );
-    toast.info(`${data.user.firstname} ${data.user.lastname} left meeting`, {
-      position: "bottom-left",
-    });
+    toast.info(
+      `${data.user.firstname} ${data.user.lastname} has left the meeting`,
+      {
+        position: "bottom-left",
+      }
+    );
 
     // document.getElementById(data.streamId).remove();
   });
@@ -209,24 +210,31 @@ export default function Meeting({ user }) {
         return element.stream.id !== data.streamId;
       })
     );
-  
+
     toast.info(`${data.name} left  meeting`, { position: "bottom-left" });
   });
 
   const stopScreenShare = (stream) => {
-    socket.emit('stop-share-screen',{room:uid})
-    setIsSharing(false)
-    setBigScreen(null)
+    setClients((current) =>
+      current.map((obj) => {
+        if (obj.user._id === user._id) {
+          return { ...obj, stream: myStreamVideo };
+        }
+        return obj;
+      })
+    );
+    socket.emit("stop-share-screen", { room: uid });
+    setIsSharing(false);
+    setBigScreen(null);
     let videoTrack = myStreamVideo.getVideoTracks()[0];
     currentPeer.map((element) => {
       let sender = element.getSenders().find(function (s) {
         return s.track.kind == videoTrack.kind;
       });
-      sender.replaceTrack(videoTrack)
+      sender.replaceTrack(videoTrack);
     });
   };
   const shareScreen = () => {
-
     navigator.mediaDevices
       .getDisplayMedia({
         video: {
@@ -238,8 +246,16 @@ export default function Meeting({ user }) {
         },
       })
       .then((stream) => {
-      
         let videoTrack = stream.getVideoTracks()[0];
+        setClients((current) =>
+          current.map((obj) => {
+            if (obj.user._id === user._id) {
+              return { ...obj, stream: stream };
+            }
+            return obj;
+          })
+        );
+        console.log(videoTrack);
         videoTrack.onended = function () {
           stopScreenShare();
         };
@@ -248,35 +264,30 @@ export default function Meeting({ user }) {
             return s.track.kind == videoTrack.kind;
           });
           sender.replaceTrack(videoTrack);
-          
         });
-        socket.emit('share-screen',{room:uid,streamId:myStreamId})
-
+        socket.emit("share-screen", { room: uid, streamId: myStreamId, user:user });
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  socket.off('big-screen').on('big-screen',data=>{
-    
+  socket.off("big-screen").on("big-screen", (data) => {
     let stream;
-    clients.map((element)=>{
-      if(element.stream.id === data.streamId)
-      {
-         stream = element.stream
+    setPresenting(data.user)
+    clients.map((element) => {
+      if (element.stream.id === data.streamId) {
+        stream = element.stream;
       }
-    })
-    setIsSharing(true)
-    setBigScreen(stream)
-
-  })
-  socket.off('close-big-screen').on('close-big-screen',data=>{
-  
-    setIsSharing(false)
-    setBigScreen(null)
-
-  })
+    });
+    setIsSharing(true);
+    setBigScreen(stream);
+  });
+  socket.off("close-big-screen").on("close-big-screen", (data) => {
+    setIsSharing(false);
+    setBigScreen(null);
+    setPresenting({})
+  });
   return (
     <>
       <div className="bg-dark position-relative" style={{ height: "100%" }}>
@@ -288,26 +299,39 @@ export default function Meeting({ user }) {
           style={{ height: "89vh", overflow: "auto" }}
           className="position-relative container p-0 "
         >
-          {isSharing?
-          <div className="big-screen-grid mt-2">
-          <video
-            className="rounded-3 big-screen-video"
-            ref={(video) => {
-              if (video) video.srcObject = bigScreen;
-            }}
-            autoPlay
-          ></video>
-        </div>:""
-        }
+          {isSharing ? (
+            <>
+            <div className="text-white p-2 rounded mt-2 w-100 d-flex" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
+              <div className="d-flex align-items-center"><img src={presenting.picture_url} className="tag"/></div>
+              <div className="d-flex align-items-center ms-2">{presenting.firstname+ " " + presenting.lastname} is presenting screen</div>
+            </div>
+              <div className="big-screen-grid mt-2">
+              <video
+                className="rounded-3 big-screen-video"
+                ref={(video) => {
+                  if (video) video.srcObject = bigScreen;
+                }}
+                autoPlay
+              ></video>
+            </div>
+            </>
           
+          ) : (
+            ""
+          )}
+
           <div className="grid-system mt-2" id="rows">
             {clients.map((element, index) => {
               return (
                 <>
-                  {/* <div className="text-white">{clients.length}</div> */}
+              
                   <div
-                    className={clients.length===1?`w-100 position-relative single-col`:`w-100 position-relative h-100`}
-                    // style={clients.length===1?{height:"88vh"}:{height:"100%"}}
+                    className={
+                      clients.length === 1
+                        ? `w-100 position-relative single-col`
+                        : `w-100 position-relative h-100`
+                    }
+                 
                     id={element.stream.id}
                     key={index}
                   >
@@ -333,8 +357,17 @@ export default function Meeting({ user }) {
                     </div>
                     <div className="d-flex position-absolute bottom-0 mb-1 ms-2">
                       <img src={element.user.picture_url} className="tag" />
+
                       <div className="text-white fw-bold d-flex align-items-center font-size ms-2">
-                        {element.user.firstname + " " + element.user.lastname}
+                        {element.user._id === user._id
+                          ? element.user.firstname +
+                            " " +
+                            element.user.lastname +
+                            " " +
+                            "(You)"
+                          : element.user.firstname +
+                            " " +
+                            element.user.lastname}
                       </div>
                     </div>
                   </div>
