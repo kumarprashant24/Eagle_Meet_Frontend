@@ -22,6 +22,7 @@ export default function Meeting({ user }) {
   const { uid } = useParams();
   const [peerid, setPeerId] = useState("");
   const [bigScreen, setBigScreen] = useState(null);
+  const [myBigScreen, setMyBigScreen] = useState(null);
   const [meetingList, setMeetingList] = useState([]);
   const [isSharing, setIsSharing] = useState(false);
 
@@ -31,7 +32,7 @@ export default function Meeting({ user }) {
   const [myStreamVideo, setMyStreamVideo] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isDisplay, setIsDisplay] = useState(false);
-  const [presenting,setPresenting] = useState({});
+  const [presenting, setPresenting] = useState({});
 
   let uniqueStreamId = "";
   const peer = new Peer();
@@ -255,7 +256,7 @@ export default function Meeting({ user }) {
             return obj;
           })
         );
-        console.log(videoTrack);
+        setMyBigScreen(stream)
         videoTrack.onended = function () {
           stopScreenShare();
         };
@@ -265,7 +266,11 @@ export default function Meeting({ user }) {
           });
           sender.replaceTrack(videoTrack);
         });
-        socket.emit("share-screen", { room: uid, streamId: myStreamId, user:user });
+        socket.emit("share-screen", {
+          room: uid,
+          streamId: myStreamId,
+          user: user,
+        });
       })
       .catch((err) => {
         console.log(err);
@@ -274,7 +279,7 @@ export default function Meeting({ user }) {
 
   socket.off("big-screen").on("big-screen", (data) => {
     let stream;
-    setPresenting(data.user)
+    setPresenting(data.user);
     clients.map((element) => {
       if (element.stream.id === data.streamId) {
         stream = element.stream;
@@ -286,7 +291,7 @@ export default function Meeting({ user }) {
   socket.off("close-big-screen").on("close-big-screen", (data) => {
     setIsSharing(false);
     setBigScreen(null);
-    setPresenting({})
+    setPresenting({});
   });
   return (
     <>
@@ -296,84 +301,102 @@ export default function Meeting({ user }) {
         <Chat room={uid} user={user}></Chat>
 
         <div
-          style={{ height: "89vh", overflow: "auto" }}
-          className="position-relative container p-0 "
+          // style={{ height: "89vh", overflow: "auto" }}
+          className="position-relative  p-0 "
         >
-          {isSharing ? (
-            <>
-            <div className="text-white p-2 rounded mt-2 w-100 d-flex" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
-              <div className="d-flex align-items-center"><img src={presenting.picture_url} className="tag"/></div>
-              <div className="d-flex align-items-center ms-2">{presenting.firstname+ " " + presenting.lastname} is presenting screen</div>
-            </div>
-              <div className="big-screen-grid mt-2">
-              <video
-                className="rounded-3 big-screen-video"
-                ref={(video) => {
-                  if (video) video.srcObject = bigScreen;
-                }}
-                autoPlay
-              ></video>
-            </div>
-            </>
-          
-          ) : (
-            ""
-          )}
-
-          <div className="grid-system mt-2" id="rows">
-            {clients.map((element, index) => {
-              return (
-                <>
-              
-                  <div
-                    className={
-                      clients.length === 1
-                        ? `w-100 position-relative single-col`
-                        : `w-100 position-relative h-100`
-                    }
-                 
-                    id={element.stream.id}
-                    key={index}
-                  >
+          <div className="row m-0">
+            {isSharing ? (
+              <div className="col-md-8">
+                <div
+                  className="text-white p-2 rounded mt-2 w-100 d-flex"
+                  style={{ background: "rgba(0, 0, 0, 0.5)" }}
+                >
+                  <div className="d-flex align-items-center">
+                    <img src={presenting.picture_url} className="tag" />
+                  </div>
+                  <div className="d-flex align-items-center ms-2">
+                    {presenting._id === user._id?"You are presenting screen": `${presenting.firstname}  ${presenting.lastname} is presenting screen`}
+                  </div>
+                </div>
+                <div className="big-screen-grid mt-2">
+                  {presenting._id === user._id ? (
                     <video
-                      className="rounded-3 "
+                      className="rounded-3 big-screen-video"
                       ref={(video) => {
-                        if (video) video.srcObject = element.stream;
+                        if (video) video.srcObject = myBigScreen;
                       }}
                       autoPlay
                     ></video>
-                    <div className=" position-absolute top-0 w-100 h-100  d-flex justify-content-center align-items-center">
-                      <img
-                        src={element.user.picture_url}
-                        className="avtar "
-                        style={{ zIndex: `${element.zIndex}` }}
-                      />
-                    </div>
-                    <div
-                      className="position-absolute top-0 end-0"
-                      style={{ zIndex: `${element.zIndexMic}` }}
-                    >
-                      <i className="fa-solid fa-microphone-slash text-white me-2 mt-2 corner   round-img bg-secondary"></i>
-                    </div>
-                    <div className="d-flex position-absolute bottom-0 mb-1 ms-2">
-                      <img src={element.user.picture_url} className="tag" />
+                  ) : (
+                    <video
+                      className="rounded-3 big-screen-video"
+                      ref={(video) => {
+                        if (video) video.srcObject = bigScreen;
+                      }}
+                      autoPlay
+                    ></video>
+                  )}
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
 
-                      <div className="text-white fw-bold d-flex align-items-center font-size ms-2">
-                        {element.user._id === user._id
-                          ? element.user.firstname +
-                            " " +
-                            element.user.lastname +
-                            " " +
-                            "(You)"
-                          : element.user.firstname +
-                            " " +
-                            element.user.lastname}
+            <div className="col" style={{ height: "89vh", overflow: "auto" }}>
+              <div className="grid-system container mt-2" id="rows">
+                {clients.map((element, index) => {
+                  return (
+                    <>
+                      <div
+                        className={
+                          clients.length === 1
+                            ? `w-100 position-relative single-col`
+                            : `w-100 position-relative h-100`
+                        }
+                        id={element.stream.id}
+                        key={index}
+                      >
+                        <video
+                          className="rounded-3 "
+                          ref={(video) => {
+                            if (video) video.srcObject = element.stream;
+                          }}
+                          autoPlay
+                        ></video>
+                        <div className=" position-absolute top-0 w-100 h-100  d-flex justify-content-center align-items-center">
+                          <img
+                            src={element.user.picture_url}
+                            className="avtar "
+                            style={{ zIndex: `${element.zIndex}` }}
+                          />
+                        </div>
+                        <div
+                          className="position-absolute top-0 end-0"
+                          style={{ zIndex: `${element.zIndexMic}` }}
+                        >
+                          <i className="fa-solid fa-microphone-slash text-white me-2 mt-2 corner   round-img bg-secondary"></i>
+                        </div>
+                        <div className="d-flex position-absolute bottom-0 mb-1 ms-2">
+                          <img src={element.user.picture_url} className="tag" />
+
+                          <div className="text-white fw-bold d-flex align-items-center font-size ms-2">
+                            {element.user._id === user._id
+                              ? element.user.firstname +
+                                " " +
+                                element.user.lastname +
+                                " " +
+                                "(You)"
+                              : element.user.firstname +
+                                " " +
+                                element.user.lastname}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </>
-              );
-            })}
+                    </>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 

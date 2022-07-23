@@ -29,6 +29,15 @@ video{
   height: 50px;
  
 }
+.grid-system-main{
+
+  
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(50%,1fr));
+  grid-column-gap: 5px;
+  grid-row-gap: 5px;
+  /* grid-template-rows: repeat(1,minmax(100%,1fr)); */
+}
 .grid-system{
 
   
@@ -107,21 +116,7 @@ div::-webkit-scrollbar-thumb{
   height: 95%;
   width: 100%;
 }
-.google-material-icons {
-  font-family: 'Google Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-}
+
 .single-col{
   height: 88vh;
 }
