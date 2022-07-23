@@ -8,9 +8,11 @@ import { useRef } from "react";
 import Modal from "./Modal";
 import { toast } from "react-toastify";
 import MeetingList from "./MeetingList";
+import Screen from "./Screen";
 import Chat from "./Chat";
 import LeaveMeeting from "./LeaveMeeting";
 import { SERVER_URL } from "../config";
+import Controls from "./Controls";
 // const socketURL = SERVER_URL;
 const socket = io.connect(SERVER_URL);
 
@@ -120,6 +122,9 @@ export default function Meeting({ user }) {
         position: "bottom-left",
       }
     );
+    setIsSharing(false);
+    setBigScreen(null);
+    setPresenting({});
 
     // document.getElementById(data.streamId).remove();
   });
@@ -212,7 +217,12 @@ export default function Meeting({ user }) {
       })
     );
 
-    toast.info(`${data.name} left  meeting`, { position: "bottom-left" });
+    toast.info(`${data.name} has left the  meeting`, {
+      position: "bottom-left",
+    });
+    setIsSharing(false);
+    setBigScreen(null);
+    setPresenting({});
   });
 
   const stopScreenShare = (stream) => {
@@ -256,7 +266,7 @@ export default function Meeting({ user }) {
             return obj;
           })
         );
-        setMyBigScreen(stream)
+        setMyBigScreen(stream);
         videoTrack.onended = function () {
           stopScreenShare();
         };
@@ -299,201 +309,24 @@ export default function Meeting({ user }) {
         <Modal room={uid} user={user} url={window.location.href}></Modal>
         <MeetingList meetingList={meetingList} />
         <Chat room={uid} user={user}></Chat>
-
-        <div
-          // style={{ height: "89vh", overflow: "auto" }}
-          className="position-relative  p-0 "
-        >
-          <div className="row m-0">
-            {isSharing ? (
-              <div className="col-md-8">
-                <div
-                  className="text-white p-2 rounded mt-2 w-100 d-flex"
-                  style={{ background: "rgba(0, 0, 0, 0.5)" }}
-                >
-                  <div className="d-flex align-items-center">
-                    <img src={presenting.picture_url} className="tag" />
-                  </div>
-                  <div className="d-flex align-items-center ms-2">
-                    {presenting._id === user._id?"You are presenting screen": `${presenting.firstname}  ${presenting.lastname} is presenting screen`}
-                  </div>
-                </div>
-                <div className="big-screen-grid mt-2">
-                  {presenting._id === user._id ? (
-                    <video
-                      className="rounded-3 big-screen-video"
-                      ref={(video) => {
-                        if (video) video.srcObject = myBigScreen;
-                      }}
-                      autoPlay
-                    ></video>
-                  ) : (
-                    <video
-                      className="rounded-3 big-screen-video"
-                      ref={(video) => {
-                        if (video) video.srcObject = bigScreen;
-                      }}
-                      autoPlay
-                    ></video>
-                  )}
-                </div>
-              </div>
-            ) : (
-              ""
-            )}
-
-            <div className="col" style={{ height: "89vh", overflow: "auto" }}>
-              <div className="grid-system container mt-2" id="rows">
-                {clients.map((element, index) => {
-                  return (
-                    <>
-                      <div
-                        className={
-                          clients.length === 1
-                            ? `w-100 position-relative single-col`
-                            : `w-100 position-relative h-100`
-                        }
-                        id={element.stream.id}
-                        key={index}
-                      >
-                        <video
-                          className="rounded-3 "
-                          ref={(video) => {
-                            if (video) video.srcObject = element.stream;
-                          }}
-                          autoPlay
-                        ></video>
-                        <div className=" position-absolute top-0 w-100 h-100  d-flex justify-content-center align-items-center">
-                          <img
-                            src={element.user.picture_url}
-                            className="avtar "
-                            style={{ zIndex: `${element.zIndex}` }}
-                          />
-                        </div>
-                        <div
-                          className="position-absolute top-0 end-0"
-                          style={{ zIndex: `${element.zIndexMic}` }}
-                        >
-                          <i className="fa-solid fa-microphone-slash text-white me-2 mt-2 corner   round-img bg-secondary"></i>
-                        </div>
-                        <div className="d-flex position-absolute bottom-0 mb-1 ms-2">
-                          <img src={element.user.picture_url} className="tag" />
-
-                          <div className="text-white fw-bold d-flex align-items-center font-size ms-2">
-                            {element.user._id === user._id
-                              ? element.user.firstname +
-                                " " +
-                                element.user.lastname +
-                                " " +
-                                "(You)"
-                              : element.user.firstname +
-                                " " +
-                                element.user.lastname}
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="d-flex justify-content-center mt-2 position-absolute bottom-0 w-100 ">
-          <div
-            className="d-flex row justify-content-between  p-2 container-fluid"
-            style={{ background: "rgba(0, 0, 0, 0.5)" }}
-          >
-            <div className="d-flex align-items col justify-content-center ms-3">
-              <div className="d-flex">
-                <div data-bs-toggle="modal" data-bs-target="#exampleModal">
-                  <div style={{ cursor: "pointer" }}>
-                    <i className="fa-solid  fa-shapes corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
-                  </div>
-                </div>
-                <div>
-                  <div style={{ cursor: "pointer" }}>
-                    <i className="fa-solid  fa-circle-info corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Controls  */}
-            <div className="d-flex align-items-center justify-content-center col">
-              <div
-                className="me-2"
-                style={{ cursor: "pointer" }}
-                onClick={() => {
-                  mute(myStreamId, myStreamVideo);
-                }}
-              >
-                {isMuted ? (
-                  <i className="fa-solid  fa-microphone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
-                ) : (
-                  <i className="fa-solid  fa-microphone unmute bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
-                )}
-              </div>
-              <div
-                className="me-2"
-                style={{ cursor: "pointer" }}
-                onClick={() => {
-                  stopVideo(myStreamId, myStreamVideo);
-                }}
-              >
-                {isDisplay ? (
-                  <i className="fa-solid  fa-video-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
-                ) : (
-                  <i className="fa-solid  fa-video call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
-                )}
-              </div>
-              <div
-                onClick={shareScreen}
-                style={{ cursor: "pointer" }}
-                className="bg-secondary round-img  p-2 d-flex ailgn-items-center me-2"
-              >
-                <box-icon name="slideshow" color="white" size="md"></box-icon>
-              </div>
-              <div onClick={closeMeeting} style={{ cursor: "pointer" }}>
-                <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
-              </div>
-            </div>
-            <div className="d-flex col justify-content-center me-3">
-              <div
-                data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasRight"
-                aria-controls="offcanvasRight"
-                className="d-flex justify-content-center align-items-center me-3"
-              >
-                <div
-                  className="d-flex justify-content-center align-items-center"
-                  style={{ cursor: "pointer" }}
-                >
-                  <box-icon name="user" color="white" size="md"></box-icon>
-                </div>
-              </div>
-              <div
-                data-bs-toggle="offcanvas"
-                data-bs-target="#chatoffcanvasRight"
-                aria-controls="chatoffcanvasRight"
-                className="d-flex justify-content-center align-items-center"
-              >
-                <div
-                  className="d-flex justify-content-center align-items-center"
-                  style={{ cursor: "pointer" }}
-                >
-                  <box-icon
-                    name="conversation"
-                    color="white"
-                    size="md"
-                  ></box-icon>
-                  {/* <i className="fa-solid  fa-message corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i> */}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Screen
+          isSharing={isSharing}
+          presenting={presenting}
+          user={user}
+          myBigScreen={myBigScreen}
+          bigScreen={bigScreen}
+          clients={clients}
+        ></Screen>
+        <Controls
+          mute={mute}
+          myStreamId={myStreamId}
+          myStreamVideo={myStreamVideo}
+          isMuted={isMuted}
+          stopVideo={stopVideo}
+          isDisplay={isDisplay}
+          shareScreen={shareScreen}
+          closeMeeting={closeMeeting}
+        ></Controls>
       </div>
     </>
   );
