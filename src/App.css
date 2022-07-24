@@ -57,8 +57,7 @@ video{
   background-color: black;
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(100%,1fr));
-  /* grid-template-rows: repeat(1,minmax(100%,1fr)); */
-  height: 100%;
+
 }
 .unmute{
   background: white;
@@ -118,12 +117,35 @@ div::-webkit-scrollbar-thumb{
 }
 
 .single-col{
-  height: 88vh;
+  height: 84vh;
 }
-@media screen and (max-width: 765px) {
+.participant-col{
+  height: 89vh;
+  overflow: auto
+}
+.participant-col-bigscreen{
+  height: 89vh;
+  overflow: auto
+}
+.screen{
+  height:88vh;
+  overflow:hidden;
+}
+.info{
+  display: flex;
+}
+@media screen and (max-width: 768px) {
   .video-container{
     height: 69vh;
     overflow: auto ;
+  }
+  .participant-col{
+    height: 82vh;
+    overflow: auto
+  }
+  .participant-col-bigscreen{
+    height: 30vh;
+    overflow: auto
   }
 }
 @media screen and (max-width: 600px) {
@@ -131,10 +153,50 @@ div::-webkit-scrollbar-thumb{
     height: 73vh;
     
   }
+  .screen{
+    height:83vh;
+    overflow:hidden;
+  }
+  .participant-col{
+    height: 82vh;
+    overflow: auto
+  }
+  .participant-col-bigscreen{
+    height: 30vh;
+    overflow: auto
+  }
+  .info{
+    display: none;
+  }
+  .avtar{
+    height: 50px;
+    width: 50px;
+    clip-path: circle(50%);
+  }
 }
-@media screen and (max-width: 350px) {
+@media screen and (max-width: 416px) {
   .font-size{
    font-size: 10px;
+  }
+  .avtar{
+    height: 50px;
+    width: 50px;
+    clip-path: circle(50%);
+  }
+  .info{
+    display: none;
+  }
+  .participant-col{
+    height: 82vh;
+    overflow: auto
+  }
+  .participant-col-bigscreen{
+    height: 40vh;
+    overflow: auto
+  }
+  .screen{
+    height:83vh;
+    overflow:hidden;
   }
 }
 @media (prefers-reduced-motion: no-preference) {

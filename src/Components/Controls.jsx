@@ -1,13 +1,13 @@
 import React from 'react'
 
-export default function Controls({mute,myStreamId,myStreamVideo,isMuted,stopVideo,isDisplay,shareScreen,closeMeeting}) {
+export default function Controls({mute,myStreamId,myStreamVideo,isMuted,stopVideo,isDisplay,shareScreen,closeMeeting,toggleScreenShare}) {
   return (
-    <div className="d-flex justify-content-center mt-2 position-absolute bottom-0 w-100 ">
+    <div className="d-flex justify-content-center mt-2 w-100 ">
     <div
-      className="d-flex row justify-content-between  p-2 container-fluid"
-      style={{ background: "rgba(0, 0, 0, 0.5)" }}
+      className="d-flex row justify-content-between   p-2 container-fluid"
+      // style={{ background: "rgba(0, 0, 0, 0.5)" }}
     >
-      <div className="d-flex align-items col justify-content-center ms-3">
+      <div className="info align-items col justify-content-center ms-3">
         <div className="d-flex">
           <div data-bs-toggle="modal" data-bs-target="#exampleModal">
             <div style={{ cursor: "pointer" }}>
@@ -50,13 +50,24 @@ export default function Controls({mute,myStreamId,myStreamVideo,isMuted,stopVide
             <i className="fa-solid  fa-video call-end bg-secondary round-img  d-flex justify-content-center align-items-center text-white"></i>
           )}
         </div>
-        <div
+        {toggleScreenShare?
+          <div
           onClick={shareScreen}
           style={{ cursor: "pointer" }}
-          className="bg-secondary round-img  p-2 d-flex ailgn-items-center me-2"
+          className="bg-white  round-img  p-2 d-flex ailgn-items-center me-2"
         >
-          <box-icon name="slideshow" color="white" size="md"></box-icon>
+          <box-icon name="slideshow" color="green" size="md"></box-icon>
         </div>
+        :
+        <div
+        onClick={shareScreen}
+        style={{ cursor: "pointer" }}
+        className="bg-secondary  round-img  p-2 d-flex ailgn-items-center me-2"
+      >
+        <box-icon name="slideshow" color="white" size="md"></box-icon>
+      </div>
+      }
+      
         <div onClick={closeMeeting} style={{ cursor: "pointer" }}>
           <i className="fa-solid  fa-phone-slash call-end bg-danger round-img  d-flex justify-content-center align-items-center text-white"></i>
         </div>

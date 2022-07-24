@@ -27,6 +27,7 @@ export default function Meeting({ user }) {
   const [myBigScreen, setMyBigScreen] = useState(null);
   const [meetingList, setMeetingList] = useState([]);
   const [isSharing, setIsSharing] = useState(false);
+  const [toggleScreenShare,setToggleScreenShare] = useState(false)
 
   const navigate = useNavigate();
   let [clients, setClients] = useState([]);
@@ -149,11 +150,9 @@ export default function Meeting({ user }) {
     }
   };
   socket.off("set-default-mic").on("set-default-mic", (data) => {
-    console.log(data);
     setClients((current) =>
       current.map((obj) => {
         if (obj.stream.id === data.streamId) {
-          console.log(obj);
           return { ...obj, zIndexMic: data.zIndexMic };
         }
         return obj;
@@ -162,7 +161,6 @@ export default function Meeting({ user }) {
   });
   const stopVideo = (streamId, streamVideo) => {
     if (isDisplay === false) {
-      console.log("off");
       socket.emit("off-video", {
         room: uid,
         streamId: streamId,
@@ -174,7 +172,7 @@ export default function Meeting({ user }) {
       setIsDisplay(true);
     } else {
       setHideAvtar(-1);
-      console.log("on");
+
       socket.emit("off-video", {
         room: uid,
         streamId: streamId,
@@ -226,6 +224,7 @@ export default function Meeting({ user }) {
   });
 
   const stopScreenShare = (stream) => {
+    setToggleScreenShare(false)
     setClients((current) =>
       current.map((obj) => {
         if (obj.user._id === user._id) {
@@ -246,6 +245,7 @@ export default function Meeting({ user }) {
     });
   };
   const shareScreen = () => {
+   
     navigator.mediaDevices
       .getDisplayMedia({
         video: {
@@ -266,7 +266,8 @@ export default function Meeting({ user }) {
             return obj;
           })
         );
-        setMyBigScreen(stream);
+        setMyBigScreen(stream)
+        setToggleScreenShare(true);
         videoTrack.onended = function () {
           stopScreenShare();
         };
@@ -309,6 +310,7 @@ export default function Meeting({ user }) {
         <Modal room={uid} user={user} url={window.location.href}></Modal>
         <MeetingList meetingList={meetingList} />
         <Chat room={uid} user={user}></Chat>
+        <div className="screen" >
         <Screen
           isSharing={isSharing}
           presenting={presenting}
@@ -317,6 +319,8 @@ export default function Meeting({ user }) {
           bigScreen={bigScreen}
           clients={clients}
         ></Screen>
+        </div>
+     
         <Controls
           mute={mute}
           myStreamId={myStreamId}
@@ -326,6 +330,7 @@ export default function Meeting({ user }) {
           isDisplay={isDisplay}
           shareScreen={shareScreen}
           closeMeeting={closeMeeting}
+          toggleScreenShare={toggleScreenShare}
         ></Controls>
       </div>
     </>
