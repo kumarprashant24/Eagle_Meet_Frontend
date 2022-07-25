@@ -2,15 +2,9 @@ import React from "react";
 import { useState } from "react";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import Peer from "peerjs";
-import io from "socket.io-client";
+import {  toast } from 'react-toastify';
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
-const socketURL = "http://localhost:5000";
-const socket = io.connect(socketURL);
-
 
 export default function Homepage({user}) {
   const navigate = useNavigate();
@@ -101,7 +95,7 @@ const joinMeeting = () =>{
       </div>
       
     </div>
-    <ToastContainer theme="colored" />
+   
     </>
     
   );

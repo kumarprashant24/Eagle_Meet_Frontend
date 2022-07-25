@@ -5,7 +5,7 @@ import io from "socket.io-client";
 import {SERVER_URL} from '../config';
 const socketURL = SERVER_URL;
 const socket = io.connect(socketURL);
-export default function Chat({ room, user }) {
+export default function Chat({ room, user ,setMessageNotification,messageNotification}) {
   const chatBox = useRef();
   const [chats, setChats] = useState([]);
 
@@ -21,6 +21,11 @@ export default function Chat({ room, user }) {
   };
   socket.off("receive-chat").on("receive-chat", (data) => {
     setChats((current) => [...current, data]);
+    if(data.sender._id !== user._id)
+    {
+      setMessageNotification(messageNotification+1)
+    }
+
   });
 
   return (

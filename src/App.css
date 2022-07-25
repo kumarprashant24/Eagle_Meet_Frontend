@@ -120,7 +120,7 @@ div::-webkit-scrollbar-thumb{
   height: 84vh;
 }
 .participant-col{
-  height: 89vh;
+  height: 87vh;
   overflow: auto
 }
 .participant-col-bigscreen{
@@ -128,7 +128,7 @@ div::-webkit-scrollbar-thumb{
   overflow: auto
 }
 .screen{
-  height:88vh;
+  height:89vh;
   overflow:hidden;
 }
 .info{

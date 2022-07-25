@@ -1,5 +1,4 @@
-import React from "react";
-
+import React, { useEffect } from "react";
 export default function Screen({
   isSharing,
   presenting,
@@ -7,14 +6,19 @@ export default function Screen({
   myBigScreen,
   bigScreen,
   clients,
+  stopScreenShare,
+  
+
 }) {
+
   return (
     <div className="position-relative h-100  p-0 ">
       {isSharing ? (
         <div
-          className="text-white container-fluid p-2 rounded mt-2  d-flex"
-          style={{ background: "rgba(0, 0, 0, 0.5)" }}
+          className="text-white justify-content-between ms-2 me-2 p-2 rounded mt-2  d-flex"
+          style={{background : "#3c4043"}}
         >
+          <div className="d-flex ">
           <div className="d-flex align-items-center">
             <img src={presenting.picture_url} className="tag" />
           </div>
@@ -23,6 +27,14 @@ export default function Screen({
               ? "You are presenting screen"
               : `${presenting.firstname}  ${presenting.lastname} is presenting screen`}
           </div>
+          </div>
+          <div>
+            {presenting._id ===user._id?
+           <div className="text-primary" onClick={stopScreenShare} style={{cursor:"pointer"}}>Stop Screen Sharing</div> 
+          :""  
+          }
+          </div>
+       
         </div>
       ) : (
         ""
@@ -96,11 +108,7 @@ export default function Screen({
 
                       <div className="text-white fw-bold d-flex align-items-center font-size ms-2">
                         {element.user._id === user._id
-                          ? element.user.firstname +
-                            " " +
-                            element.user.lastname +
-                            " " +
-                            "(You)"
+                          ?  "(You)"
                           : element.user.firstname +
                             " " +
                             element.user.lastname}

@@ -1,12 +1,11 @@
 import React from 'react'
 
-export default function Controls({mute,myStreamId,myStreamVideo,isMuted,stopVideo,isDisplay,shareScreen,closeMeeting,toggleScreenShare}) {
+export default function Controls({mute,myStreamId,myStreamVideo,isMuted,stopVideo,isDisplay,shareScreen,closeMeeting,toggleScreenShare,openMessageBox,messageNotification}) {
   return (
     <div className="d-flex justify-content-center mt-2 w-100 ">
     <div
-      className="d-flex row justify-content-between   p-2 container-fluid"
-      // style={{ background: "rgba(0, 0, 0, 0.5)" }}
-    >
+      className="d-flex row justify-content-between gy-2  p-2 container-fluid"
+        >
       <div className="info align-items col justify-content-center ms-3">
         <div className="d-flex">
           <div data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -93,15 +92,16 @@ export default function Controls({mute,myStreamId,myStreamVideo,isMuted,stopVide
           className="d-flex justify-content-center align-items-center"
         >
           <div
-            className="d-flex justify-content-center align-items-center"
+            className="d-flex justify-content-center align-items-center position-relative"
             style={{ cursor: "pointer" }}
+            onClick={openMessageBox}
           >
             <box-icon
               name="conversation"
               color="white"
               size="md"
             ></box-icon>
-            {/* <i className="fa-solid  fa-message corner fa-2x  round-img  d-flex justify-content-center align-items-center text-white"></i> */}
+            <div className='bg-danger text-white p-1 round-img position-absolute bottom-50 end-0' style={{fontSize:"15px"}}>{messageNotification}</div>
           </div>
         </div>
       </div>
