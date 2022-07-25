@@ -1,8 +1,6 @@
-import logo from './logo.svg';
 import './App.css';
 import Meeting from './Components/Meeting';
 import Homepage from './Components/Homepage';
-import Navbar from './Components/Navbar';
 import axios from 'axios';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';

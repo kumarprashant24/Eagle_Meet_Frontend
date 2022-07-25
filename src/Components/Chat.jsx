@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import ScrollToBottom from "react-scroll-to-bottom";
 import io from "socket.io-client";
-
 import {SERVER_URL} from '../config';
-const socketURL = SERVER_URL;
-const socket = io.connect(socketURL);
+
+const socket = io.connect(SERVER_URL);
 export default function Chat({ room, user ,setMessageNotification,messageNotification}) {
   const chatBox = useRef();
   const [chats, setChats] = useState([]);
