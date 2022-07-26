@@ -16,7 +16,6 @@ let checkpeer = {};
 
 export default function Meeting({ user }) {
   const [currentPeer, setCurrentPeer] = useState([]);
-  const [refresh, setRefresh] = useState(false);
   const { uid } = useParams();
 
   const [peerid, setPeerId] = useState("");
@@ -73,7 +72,7 @@ export default function Meeting({ user }) {
 
   useEffect(() => {
     loadUser();
-  }, [refresh]);
+  }, []);
 
   function connectToNewUser(data, stream, userDetails) {
     const options = { metadata: { user: user } };
@@ -234,6 +233,8 @@ export default function Meeting({ user }) {
       sender.replaceTrack(videoTrack);
     });
   };
+
+  
   const shareScreen = () => {
    
     navigator.mediaDevices
@@ -276,6 +277,8 @@ export default function Meeting({ user }) {
       .catch((err) => {
         console.log(err);
       });
+
+   
   };
 
   socket.off("big-screen").on("big-screen", (data) => {
@@ -288,7 +291,7 @@ export default function Meeting({ user }) {
     });
     setIsSharing(true);
     setBigScreen(stream);
-   
+     
    
   });
   socket.off("close-big-screen").on("close-big-screen", (data) => {
