@@ -25,6 +25,7 @@ function App() {
   async function fetchUser() {
 
     await axios.get(`${SERVER_URL}/api/auth/login/success`, { withCredentials: true }).then((res)=>{
+      console.log(res.data);
       setIsSuccess(res.data.success);
       setUser(res.data.user)
    
