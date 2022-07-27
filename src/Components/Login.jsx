@@ -14,8 +14,8 @@ export default function Login({user}) {
     <>
        <Navbar user={user}></Navbar>
       <div
-        className="d-flex justify-content-center align-items-center mt-3"
-      style={{height:"90vh"}}
+        className="d-flex justify-content-center align-items-center"
+      style={{height:"100%"}}
       >
         <div className="container">
           <div className=" ">
@@ -42,7 +42,7 @@ export default function Login({user}) {
                   <div className="">
                     <div className="mt-5">
                       <button
-                        className="btn btn-outline-success mb-3"
+                        className="btn btn-outline-success"
                         type="submit"
                         onClick={GoogleAuth}
                       >

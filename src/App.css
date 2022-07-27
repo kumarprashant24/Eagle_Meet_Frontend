@@ -74,9 +74,7 @@ video{
 .round-img {
   clip-path: circle();
 }
-.login-panel{
-  min-height: 75%;
-}
+
 .avtar{
   height: 90px;
   width: 90px;
@@ -201,6 +199,7 @@ div::-webkit-scrollbar-thumb{
     overflow:hidden;
   }
 }
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
