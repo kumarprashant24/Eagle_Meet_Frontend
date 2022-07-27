@@ -32,7 +32,7 @@ const joinMeeting = () =>{
   return (
     <>
       <Navbar user={user}></Navbar>
-      <div className="d-flex justify-content-center align-items-center">
+      <div className="d-flex justify-content-center align-items-center mt-3">
       <div>
       <div className="container d-flex " >
         <div className="row">
