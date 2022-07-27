@@ -38,7 +38,10 @@ export default function Meeting({ user }) {
   const loadUser = () => {
     setClients([]);
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
+      .getUserMedia({ video: true,   audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+      }})
       .then((stream) => {
         setMyStreamId(stream.id);
         uniqueStreamId = stream.id;
