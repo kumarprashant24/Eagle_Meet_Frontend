@@ -38,7 +38,7 @@ export default function Meeting({ user }) {
   const loadUser = () => {
     setClients([]);
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: false })
+      .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         setMyStreamId(stream.id);
         uniqueStreamId = stream.id;
@@ -123,7 +123,7 @@ export default function Meeting({ user }) {
   const mute = (streamId, streamVideo) => {
     console.log(isMuted);
     if (isMuted === false) {
-      // myStreamVideo.getTracks()[0].enabled = false;
+      myStreamVideo.getTracks()[0].enabled = false;
       socket.emit("off-mic", {
         room: uid,
         streamId: streamId,
@@ -131,7 +131,7 @@ export default function Meeting({ user }) {
       });
       setIsMuted(true);
     } else {
-      // myStreamVideo.getTracks()[0].enabled = true;
+      myStreamVideo.getTracks()[0].enabled = true;
       socket.emit("off-mic", {
         room: uid,
         streamId: streamId,
@@ -157,7 +157,7 @@ export default function Meeting({ user }) {
         streamId: streamId,
         zIndex: "1",
       });
-      myStreamVideo.getTracks()[0].enabled = false;
+      myStreamVideo.getTracks()[1].enabled = false;
     
       setIsDisplay(true);
     } else {
@@ -168,7 +168,7 @@ export default function Meeting({ user }) {
         zIndex: "-1",
       });
 
-      myStreamVideo.getTracks()[0].enabled = true;
+      myStreamVideo.getTracks()[1].enabled = true;
 
       setIsDisplay(false)
     }
