@@ -12,7 +12,7 @@ export default function Login({user}) {
 
   return (
     <>
-       <Navbar user={user}></Navbar>
+       {/* <Navbar user={user}></Navbar> */}
       <div
         className="d-flex justify-content-center align-items-center"
       style={{height:"100%"}}
