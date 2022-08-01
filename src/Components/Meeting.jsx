@@ -19,12 +19,12 @@ export default function Meeting({ user }) {
   const { uid } = useParams();
 
   const [peerid, setPeerId] = useState("");
-  const [messageNotification,setMessageNotification] = useState(0)
+  const [messageNotification, setMessageNotification] = useState(0);
   const [bigScreen, setBigScreen] = useState(null);
   const [myBigScreen, setMyBigScreen] = useState(null);
   const [meetingList, setMeetingList] = useState([]);
   const [isSharing, setIsSharing] = useState(false);
-  const [toggleScreenShare,setToggleScreenShare] = useState(false)
+  const [toggleScreenShare, setToggleScreenShare] = useState(false);
   const navigate = useNavigate();
   let [clients, setClients] = useState([]);
   let [myStreamId, setMyStreamId] = useState("");
@@ -34,11 +34,12 @@ export default function Meeting({ user }) {
   const [presenting, setPresenting] = useState({});
   let uniqueStreamId = "";
   const peer = new Peer();
-
+  let arr = [];
   const loadUser = () => {
     setClients([]);
+
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: false })
+      .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         setMyStreamId(stream.id);
         uniqueStreamId = stream.id;
@@ -46,15 +47,23 @@ export default function Meeting({ user }) {
         addVideoStream(user, stream);
 
         peer.on("call", (call) => {
+         
           call.answer(stream, user);
-
-          call.on("stream", (userVideoStream) => {
-            setCurrentPeer((current) => [...current, call.peerConnection]);
-
-            addVideoStream(call.metadata.user, userVideoStream);
-          });
+          
+            call.on("stream", (userVideoStream) => {
+              if (arr.indexOf(userVideoStream.id) !== -1) {
+              }
+              else{
+                setCurrentPeer((current) => [...current, call.peerConnection]);
+                addVideoStream(call.metadata.user, userVideoStream);
+                arr.push(userVideoStream.id);
+              }
+            });
+        
+         
         });
         socket.off().on("user-connected", (data) => {
+          console.log("user joined");
           connectToNewUser(data.id, stream, data.user);
         });
       });
@@ -75,11 +84,17 @@ export default function Meeting({ user }) {
   }, []);
 
   function connectToNewUser(data, stream, userDetails) {
-    const options = { metadata: { user: user } };
+   
+    const options = { metadata: { userId: peer.id, user: user } };
     const call = peer.call(data, stream, options);
     call.on("stream", (userVideoStream) => {
       setCurrentPeer((current) => [...current, call.peerConnection]);
-      addVideoStream(userDetails, userVideoStream);
+      if (arr.indexOf(userVideoStream.id) !== -1) {
+      }
+      else{
+        addVideoStream(userDetails, userVideoStream);
+        arr.push(userVideoStream.id);
+      }
     });
     call.on("close", () => {});
 
@@ -117,13 +132,12 @@ export default function Meeting({ user }) {
     setIsSharing(false);
     setBigScreen(null);
     setPresenting({});
-
   });
 
   const mute = (streamId, streamVideo) => {
     console.log(isMuted);
     if (isMuted === false) {
-      // myStreamVideo.getTracks()[0].enabled = false;
+      myStreamVideo.getTracks()[0].enabled = false;
       socket.emit("off-mic", {
         room: uid,
         streamId: streamId,
@@ -131,7 +145,7 @@ export default function Meeting({ user }) {
       });
       setIsMuted(true);
     } else {
-      // myStreamVideo.getTracks()[0].enabled = true;
+      myStreamVideo.getTracks()[0].enabled = true;
       socket.emit("off-mic", {
         room: uid,
         streamId: streamId,
@@ -157,20 +171,19 @@ export default function Meeting({ user }) {
         streamId: streamId,
         zIndex: "1",
       });
-      myStreamVideo.getTracks()[0].enabled = false;
-    
+      myStreamVideo.getTracks()[1].enabled = false;
+
       setIsDisplay(true);
     } else {
-           
       socket.emit("off-video", {
         room: uid,
         streamId: streamId,
         zIndex: "-1",
       });
 
-      myStreamVideo.getTracks()[0].enabled = true;
+      myStreamVideo.getTracks()[1].enabled = true;
 
-      setIsDisplay(false)
+      setIsDisplay(false);
     }
   };
   socket.off("set-default-video").on("set-default-video", (data) => {
@@ -213,7 +226,7 @@ export default function Meeting({ user }) {
   });
 
   const stopScreenShare = () => {
-    setToggleScreenShare(false)
+    setToggleScreenShare(false);
     setClients((current) =>
       current.map((obj) => {
         if (obj.user._id === user._id) {
@@ -234,9 +247,7 @@ export default function Meeting({ user }) {
     });
   };
 
-  
   const shareScreen = () => {
-   
     navigator.mediaDevices
       .getDisplayMedia({
         video: {
@@ -257,7 +268,7 @@ export default function Meeting({ user }) {
             return obj;
           })
         );
-        setMyBigScreen(stream)
+        setMyBigScreen(stream);
         setToggleScreenShare(true);
         videoTrack.onended = function () {
           stopScreenShare();
@@ -277,8 +288,6 @@ export default function Meeting({ user }) {
       .catch((err) => {
         console.log(err);
       });
-
-   
   };
 
   socket.off("big-screen").on("big-screen", (data) => {
@@ -291,8 +300,6 @@ export default function Meeting({ user }) {
     });
     setIsSharing(true);
     setBigScreen(stream);
-     
-   
   });
   socket.off("close-big-screen").on("close-big-screen", (data) => {
     setIsSharing(false);
@@ -300,29 +307,33 @@ export default function Meeting({ user }) {
     setPresenting({});
   });
 
-  const openMessageBox = ()=>{
-   
-    setMessageNotification(0)
-  }
- 
+  const openMessageBox = () => {
+    setMessageNotification(0);
+  };
+
   return (
     <>
       <div className="bg-dark position-relative" style={{ height: "100%" }}>
         <Modal room={uid} user={user} url={window.location.href}></Modal>
-        <MeetingList meetingList={meetingList} user={user}/>
-        <Chat room={uid} user={user} messageNotification={messageNotification} setMessageNotification={setMessageNotification}></Chat>
-        <div className="screen" >
-        <Screen
-          isSharing={isSharing}
-          presenting={presenting}
+        <MeetingList meetingList={meetingList} user={user} />
+        <Chat
+          room={uid}
           user={user}
-          myBigScreen={myBigScreen}
-          bigScreen={bigScreen}
-          clients={clients}
-          stopScreenShare={stopScreenShare}
-        ></Screen>
+          messageNotification={messageNotification}
+          setMessageNotification={setMessageNotification}
+        ></Chat>
+        <div className="screen">
+          <Screen
+            isSharing={isSharing}
+            presenting={presenting}
+            user={user}
+            myBigScreen={myBigScreen}
+            bigScreen={bigScreen}
+            clients={clients}
+            stopScreenShare={stopScreenShare}
+          ></Screen>
         </div>
-     
+
         <Controls
           mute={mute}
           myStreamId={myStreamId}
