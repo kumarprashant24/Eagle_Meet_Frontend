@@ -312,14 +312,12 @@ export default function Meeting({ user }) {
     });
     setIsSharing(true);
     setBigScreen(stream);
-    // console.log(backupStream.getTracks());
-    // console.log(stream.getTracks());
-    
-    clients.map((element) => {
-      if (element.stream.id === data.streamId) {
-        element.stream =myStreamVideo;
-      }
-    });
+
+    // clients.map((element) => {
+    //   if (element.stream.id === data.streamId) {
+    //     element.stream =myStreamVideo;
+    //   }
+    // });
   
   });
   socket.off("close-big-screen").on("close-big-screen", (data) => {
