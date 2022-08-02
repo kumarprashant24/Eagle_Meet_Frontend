@@ -20,6 +20,7 @@ export default function Meeting({ user }) {
 
   const [peerid, setPeerId] = useState("");
   const [messageNotification, setMessageNotification] = useState(0);
+  const [backupStream,setBackupStream] = useState(null);
   const [bigScreen, setBigScreen] = useState(null);
   const [myBigScreen, setMyBigScreen] = useState(null);
   const [meetingList, setMeetingList] = useState([]);
@@ -34,33 +35,29 @@ export default function Meeting({ user }) {
   const [presenting, setPresenting] = useState({});
   let uniqueStreamId = "";
   const peer = new Peer();
-  let arr = [];
+  let streamIds = [];
   const loadUser = () => {
     setClients([]);
 
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
+        
         setMyStreamId(stream.id);
         uniqueStreamId = stream.id;
         setMyStreamVideo(stream);
         addVideoStream(user, stream);
 
         peer.on("call", (call) => {
-         
           call.answer(stream, user);
-          
-            call.on("stream", (userVideoStream) => {
-              if (arr.indexOf(userVideoStream.id) !== -1) {
-              }
-              else{
-                setCurrentPeer((current) => [...current, call.peerConnection]);
-                addVideoStream(call.metadata.user, userVideoStream);
-                arr.push(userVideoStream.id);
-              }
-            });
-        
-         
+
+          call.on("stream", (userVideoStream) => {
+            if (streamIds.indexOf(userVideoStream.id) === -1) {
+              setCurrentPeer((current) => [...current, call.peerConnection]);
+              addVideoStream(call.metadata.user, userVideoStream);
+              streamIds.push(userVideoStream.id);
+            }
+          });
         });
         socket.off().on("user-connected", (data) => {
           console.log("user joined");
@@ -89,11 +86,9 @@ export default function Meeting({ user }) {
     const call = peer.call(data, stream, options);
     call.on("stream", (userVideoStream) => {
       setCurrentPeer((current) => [...current, call.peerConnection]);
-      if (arr.indexOf(userVideoStream.id) !== -1) {
-      }
-      else{
+      if (streamIds.indexOf(userVideoStream.id) === -1) {
         addVideoStream(userDetails, userVideoStream);
-        arr.push(userVideoStream.id);
+        streamIds.push(userVideoStream.id);
       }
     });
     call.on("close", () => {});
@@ -112,7 +107,9 @@ export default function Meeting({ user }) {
   }
 
   socket.off("user-disconnected").on("user-disconnected", (data) => {
+    console.log(checkpeer[data.id]);
     if (checkpeer[data.id]) checkpeer[data.id].close();
+    console.log(checkpeer[data.id]);
     setMeetingList((current) =>
       current.filter((employee) => {
         return employee.streamId !== data.streamId;
@@ -135,7 +132,6 @@ export default function Meeting({ user }) {
   });
 
   const mute = (streamId, streamVideo) => {
-    console.log(isMuted);
     if (isMuted === false) {
       myStreamVideo.getTracks()[0].enabled = false;
       socket.emit("off-mic", {
@@ -248,6 +244,8 @@ export default function Meeting({ user }) {
   };
 
   const shareScreen = () => {
+
+    // socket.emit('backup',{room: uid,streamId: myStreamId,user: user})
     navigator.mediaDevices
       .getDisplayMedia({
         video: {
@@ -260,14 +258,14 @@ export default function Meeting({ user }) {
       })
       .then((stream) => {
         let videoTrack = stream.getVideoTracks()[0];
-        setClients((current) =>
-          current.map((obj) => {
-            if (obj.user._id === user._id) {
-              return { ...obj, stream: stream };
-            }
-            return obj;
-          })
-        );
+        // setClients((current) =>
+        //   current.map((obj) => {
+        //     if (obj.user._id === user._id) {
+        //       return { ...obj, stream: stream };
+        //     }
+        //     return obj;
+        //   })
+        // );
         setMyBigScreen(stream);
         setToggleScreenShare(true);
         videoTrack.onended = function () {
@@ -277,6 +275,8 @@ export default function Meeting({ user }) {
           let sender = element.getSenders().find(function (s) {
             return s.track.kind == videoTrack.kind;
           });
+          console.log(sender);
+          
           sender.replaceTrack(videoTrack);
         });
         socket.emit("share-screen", {
@@ -284,12 +284,24 @@ export default function Meeting({ user }) {
           streamId: myStreamId,
           user: user,
         });
+       
       })
       .catch((err) => {
         console.log(err);
       });
   };
+  
+// socket.off('backup-stream').on('backup-stream',data=>{
+//  console.log(data);
+//   clients.map((element) => {
+//     if (element.stream.id === data.streamId) {
+//       console.log(element);
+//       console.log(element.stream.getTracks());
+//       //  setBackupStream(element.stream)
+//     }
+//   });
 
+// })
   socket.off("big-screen").on("big-screen", (data) => {
     let stream;
     setPresenting(data.user);
@@ -300,6 +312,15 @@ export default function Meeting({ user }) {
     });
     setIsSharing(true);
     setBigScreen(stream);
+    // console.log(backupStream.getTracks());
+    // console.log(stream.getTracks());
+    
+    clients.map((element) => {
+      if (element.stream.id === data.streamId) {
+        element.stream =myStreamVideo;
+      }
+    });
+  
   });
   socket.off("close-big-screen").on("close-big-screen", (data) => {
     setIsSharing(false);
