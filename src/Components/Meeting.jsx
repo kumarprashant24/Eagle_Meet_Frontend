@@ -40,9 +40,15 @@ export default function Meeting({ user }) {
     setClients([]);
 
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
+      .getUserMedia({ video: true,  audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        muted:true
+      }})
       .then((stream) => {
-        
+        // stream.getTracks()[0].muted = false;
+    
+        console.log(stream.getTracks());
         setMyStreamId(stream.id);
         uniqueStreamId = stream.id;
         setMyStreamVideo(stream);
@@ -56,6 +62,7 @@ export default function Meeting({ user }) {
               setCurrentPeer((current) => [...current, call.peerConnection]);
               addVideoStream(call.metadata.user, userVideoStream);
               streamIds.push(userVideoStream.id);
+            
             }
           });
         });
@@ -126,9 +133,9 @@ export default function Meeting({ user }) {
         position: "bottom-left",
       }
     );
-    setIsSharing(false);
-    setBigScreen(null);
-    setPresenting({});
+    // setIsSharing(false);
+    // setBigScreen(null);
+    // setPresenting({});
   });
 
   const mute = (streamId, streamVideo) => {
@@ -242,10 +249,8 @@ export default function Meeting({ user }) {
       sender.replaceTrack(videoTrack);
     });
   };
-
+ 
   const shareScreen = () => {
-
-    // socket.emit('backup',{room: uid,streamId: myStreamId,user: user})
     navigator.mediaDevices
       .getDisplayMedia({
         video: {
@@ -275,8 +280,7 @@ export default function Meeting({ user }) {
           let sender = element.getSenders().find(function (s) {
             return s.track.kind == videoTrack.kind;
           });
-          console.log(sender);
-          
+               
           sender.replaceTrack(videoTrack);
         });
         socket.emit("share-screen", {
@@ -284,25 +288,19 @@ export default function Meeting({ user }) {
           streamId: myStreamId,
           user: user,
         });
-       
+
       })
+      
       .catch((err) => {
         console.log(err);
       });
   };
-  
-// socket.off('backup-stream').on('backup-stream',data=>{
-//  console.log(data);
-//   clients.map((element) => {
-//     if (element.stream.id === data.streamId) {
-//       console.log(element);
-//       console.log(element.stream.getTracks());
-//       //  setBackupStream(element.stream)
-//     }
-//   });
 
-// })
+
   socket.off("big-screen").on("big-screen", (data) => {
+    console.log("big screen");
+    // console.log(backupStr);
+    // console.log(backupStream);
     let stream;
     setPresenting(data.user);
     clients.map((element) => {
@@ -315,9 +313,11 @@ export default function Meeting({ user }) {
 
     // clients.map((element) => {
     //   if (element.stream.id === data.streamId) {
-    //     element.stream =myStreamVideo;
+    //     element.stream =backupStream;
+      
     //   }
     // });
+  
   
   });
   socket.off("close-big-screen").on("close-big-screen", (data) => {
