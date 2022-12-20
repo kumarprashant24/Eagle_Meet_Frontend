@@ -12,10 +12,10 @@ export default function Login({user}) {
 
   return (
     <>
-       <Navbar user={user}></Navbar>
+       {/* <Navbar user={user}></Navbar> */}
       <div
         className="d-flex justify-content-center align-items-center"
-        style={{ height: "90vh" }}
+      style={{height:"100vh"}}
       >
         <div className="container">
           <div className=" ">
@@ -33,7 +33,7 @@ export default function Login({user}) {
               <div className="col-md-6 d-flex align-items-center ">
                 <div className="">
                   <div className="">
-                    <h1 className="main-heading">Premium video meetings. Now free for everyone with Eagle Meet.</h1>
+                    <div className="main-heading">Premium video meetings. Now free for everyone with Eagle Meet.</div>
                     <div className="">
                       Connect, collaborate, and celebrate from anywhere with
                       Eagle Meet

@@ -32,20 +32,21 @@ const joinMeeting = () =>{
   return (
     <>
       <Navbar user={user}></Navbar>
-      <div className="d-flex justify-content-center align-items-center" style={{height:'90vh'}}>
+      
+      <div className="d-flex justify-content-center align-items-center " style={{height:"90vh"}}>
       <div>
       <div className="container d-flex " >
         <div className="row">
           <div className="col-md-6 d-flex align-items-center">
             <div className="">
               <div className="">
-                <h1 className="main-heading">Secure Video Conferencing for everyone</h1>
-                <div className="">
+                <div className="main-heading ">Secure Video Conferencing for everyone</div>
+                <div className="mb-5">
                   Connect, collaborate, and celebrate from anywhere with Eagle
                   Meet
                 </div>
               </div>
-              <div className="row ">
+              {/* <div className="row ">
                 <div className=" col p-4 ">
                   <h2 className="">2.7K</h2>
                   <p className="">Users</p>
@@ -62,7 +63,7 @@ const joinMeeting = () =>{
                   <h2 className="">4</h2>
                   <p className="">Products</p>
                 </div>
-              </div>
+              </div> */}
 
               <div className="row gx-2 gy-2">
                 <Link to={`/meeting/${meetingId}`} className="col-md-5">
@@ -75,7 +76,7 @@ const joinMeeting = () =>{
               
                 </div>
                 <div className="col d-flex align-items-center justify-content-center">
-                <div className="  text-success text-decoration-underline" onClick={joinMeeting} style={{cursor:"pointer"}}>join</div>
+                <div className="  text-success text-decoration-underline mb-2" onClick={joinMeeting} style={{cursor:"pointer"}}>join</div>
                 </div>
               </div>
             </div>

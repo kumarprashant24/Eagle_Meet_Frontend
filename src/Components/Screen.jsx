@@ -89,6 +89,7 @@ export default function Screen({
                         if (video) video.srcObject = element.stream;
                       }}
                       autoPlay
+                      muted={element.user._id===user._id?true:false}
                     ></video>
                     <div className=" position-absolute top-0 w-100 h-100  d-flex justify-content-center align-items-center">
                       <img

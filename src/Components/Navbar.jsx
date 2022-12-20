@@ -8,16 +8,6 @@ export default function Navbar({ user }) {
     e.preventDefault();
     window.open(`${SERVER_URL}/api/auth/logout`, "_self");
   };
-
-  // useEffect(() => {
-  //   console.log(user);
-  //   if (user === null) {
-  //     console.log("it is correct");
-  //   } else {
-  //     console.log("not corrext");
-  //   }
-  // }, []);
-
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light border-bottom">
       <div className="container-fluid">
@@ -45,7 +35,7 @@ export default function Navbar({ user }) {
             ""
           ) : (
             <>
-              <div className="d-flex">
+              <div className="d-flex justify-content-between ms-2 me-2">
                 <div className="d-flex align-items-center me-3">
                   <img src={user.picture_url} className="tiny_pic" />
                 </div>
